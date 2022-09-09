@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ApplicationB {
     private static final JSlider slider = new JSlider();
-    private static AtomicInteger semaphore = new AtomicInteger(0);
+    private static final AtomicInteger semaphore = new AtomicInteger(0);
     private static MyThread firstThread;
     private static MyThread secondThread;
     private static void setGUI() {

@@ -1,4 +1,6 @@
-package org.example.subtask_a;
+package subtask_a;
+
+import subtask_a.MyThread;
 
 import javax.swing.*;
 

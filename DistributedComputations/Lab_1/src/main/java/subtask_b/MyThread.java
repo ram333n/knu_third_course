@@ -3,7 +3,6 @@ package subtask_b;
 import javax.swing.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-//B
 public class MyThread extends Thread {
     private final JSlider slider;
     private final int step;
@@ -24,11 +23,12 @@ public class MyThread extends Thread {
             try {
                 sleep(100);
                 int sliderValue = slider.getValue();
-                if (sliderValue > 10 && sliderValue < 90) {
+                boolean toMoveFromCorner = (sliderValue <= 10 && step > 0) || (sliderValue >= 90 && step < 0);
+                if ((sliderValue > 10 && sliderValue < 90) || toMoveFromCorner ) {
                     slider.setValue(sliderValue + step);
                 }
             } catch (InterruptedException e) {
-                System.out.println("Interrupted thread with id : " + getId());
+                interrupt();
             }
         }
         semaphore.set(0);

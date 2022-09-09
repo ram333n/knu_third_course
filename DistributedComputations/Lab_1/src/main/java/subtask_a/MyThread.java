@@ -1,4 +1,4 @@
-package org.example.subtask_a;
+package subtask_a;
 
 import javax.swing.*;
 
