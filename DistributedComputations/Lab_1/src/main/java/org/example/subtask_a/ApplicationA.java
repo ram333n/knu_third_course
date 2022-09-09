@@ -7,7 +7,6 @@ public class ApplicationA {
     private static MyThread firstThread = new MyThread(slider, -1);
     private static MyThread secondThread = new MyThread(slider, 1);
     private static void setGUI() {
-        //  TODO : add listeners
         JFrame frame = new JFrame("ApplicationA");
 
         slider.setBounds(40, 40 ,420, 40);
