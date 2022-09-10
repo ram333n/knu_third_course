@@ -43,6 +43,7 @@ public class ApplicationB {
             label.setVisible(true);
 
             firstThread = new MyThread(slider, -1, semaphore);
+            firstThread.setPriority(Thread.MIN_PRIORITY);
             firstThread.start();
         });
 
@@ -54,6 +55,7 @@ public class ApplicationB {
             label.setVisible(true);
 
             secondThread  = new MyThread(slider, 1, semaphore);
+            secondThread.setPriority(Thread.MAX_PRIORITY);
             secondThread.start();
         });
 

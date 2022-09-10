@@ -1,7 +1,5 @@
 package subtask_a;
 
-import subtask_a.MyThread;
-
 import javax.swing.*;
 
 public class ApplicationA {
