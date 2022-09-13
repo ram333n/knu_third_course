@@ -1,43 +1,43 @@
 package org.example;
 
+import org.example.interfaces.IMessage;
+import org.example.interfaces.IProcessor;
 import org.example.interfaces.IProducer;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-public class Producer extends Thread implements IProducer<Integer> {
-    private final BlockingQueue<Integer> queue;
-    private final List<Integer> data;
-    private final long interval;
+public class Producer<T extends IMessage> extends Thread implements IProducer<T> {
+    private final BlockingQueue<T> queue;
+    private final List<T> data;
+    private final IProcessor<T> processor;
 
-    public Producer(BlockingQueue<Integer> queue, List<Integer> data, long interval) {
+    public Producer(BlockingQueue<T> queue, List<T> data, IProcessor<T> processor) {
         this.queue = queue;
         this.data = data;
-        this.interval = interval;
+        this.processor = processor;
     }
 
     @Override
-    public void produce(Integer product) throws InterruptedException {
+    public void produce(T product) throws InterruptedException {
+        System.out.println("Producer produced " + product.toString());
         queue.put(product);
     }
 
     @Override
     public void run() {
-        for(Integer product : data) {
+        for(int i = 0; i < data.size(); i++) {
             try {
+                T product = data.get(i);
+                if(i == data.size() - 1) {
+                    product.makePoisonPill();
+                }
+
                 produce(product);
-                System.out.println("Producer produced " + product);
-                sleep(interval);
+                processor.process(product);
             } catch (InterruptedException e) {
                 System.out.println("Producer interrupted");
             }
-        }
-
-        try {
-            produce(-1);
-            System.out.println("Poison pilled!");
-        } catch (InterruptedException e) {
-            System.out.println("Producer interrupted in poison pill production");
         }
     }
 }

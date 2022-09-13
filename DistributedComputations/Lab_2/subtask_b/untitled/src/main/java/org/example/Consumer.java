@@ -1,41 +1,38 @@
 package org.example;
 
 import org.example.interfaces.IConsumer;
+import org.example.interfaces.IMessage;
+import org.example.interfaces.IProcessor;
 
 import java.util.concurrent.BlockingQueue;
 
-public class Consumer extends Thread implements IConsumer<Integer> {
-    private final BlockingQueue<Integer> queue;
-    private final long interval;
+public class Consumer<T extends IMessage> extends Thread implements IConsumer<T> {
+    private final BlockingQueue<T> queue;
+    private final IProcessor<T> processor;
 
-    public Consumer(BlockingQueue<Integer> queue, long interval) {
+    public Consumer(BlockingQueue<T> queue, IProcessor<T> processor) {
         this.queue = queue;
-        this.interval = interval;
+        this.processor = processor;
+
     }
 
     @Override
-    public Integer consume() throws InterruptedException {
-        return queue.take();
-    }
-
-    @Override
-    public boolean isPoisonPill(Integer message) {
-        return message == -1;
+    public T consume() throws InterruptedException {
+        T consumedProduct = queue.take();
+        System.out.println("Consumer received " + consumedProduct.toString());
+        return consumedProduct;
     }
 
     @Override
     public void run() {
         while(true) {
             try {
-                Integer consumedProduct = consume();
-                System.out.println("Consumer received " + consumedProduct);
+                T consumedProduct = consume();
+                processor.process(consumedProduct);
 
-                if(isPoisonPill(consumedProduct)) {
+                if(consumedProduct.isPoisonPill()) {
                     break;
                 }
-
-                sleep(interval);
-                System.out.println("Consumer processed " + consumedProduct);
             } catch (InterruptedException e) {
                 System.out.println("Consumer interrupted");
             }
