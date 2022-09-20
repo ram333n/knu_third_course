@@ -1,6 +1,7 @@
 package org.example.manager;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.example.vacations.AbstractVacation;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @AllArgsConstructor
+@Getter //just for test
 public class VacationManager {
     private final List<AbstractVacation> vacationStorage;
 
@@ -24,12 +26,6 @@ public class VacationManager {
             System.out.printf("Variant : %d%n%s", i, vacationStorage.get(i));
             System.out.println("------------------------------------");
         }
-    }
-
-    private enum SortBy {
-        PRICE,
-        DATE,
-        DURATION
     }
 
     public void sort(SortBy filter) {
