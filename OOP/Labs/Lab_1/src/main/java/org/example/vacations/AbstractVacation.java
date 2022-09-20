@@ -1,4 +1,4 @@
-package org.example.trips;
+package org.example.vacations;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,13 +12,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 @Setter
-public abstract class AbstractTrip {
-    protected String description;
-    protected BigDecimal price;
-    protected Transport transport;
-    protected LocalDate startDate;
-    protected int duration;
-    protected boolean isNutritionIncluded;
+public abstract class AbstractVacation {
+    protected final String description;
+    protected final BigDecimal price;
+    protected final Transport transport;
+    protected final LocalDate startDate;
+    protected final int duration;
+    protected final boolean isNutritionIncluded;
 
     @Override
     public String toString() {

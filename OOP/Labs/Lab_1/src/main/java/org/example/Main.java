@@ -1,7 +1,7 @@
 package org.example;
 
 import org.example.transport.Bus;
-import org.example.trips.Cruise;
+import org.example.vacations.Cruise;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

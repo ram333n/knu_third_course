@@ -1,11 +1,11 @@
-package org.example.trips;
+package org.example.vacations;
 
 import org.example.transport.Transport;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class SickLeave extends AbstractTrip {
+public class SickLeave extends AbstractVacation {
     public SickLeave(String description,
                      BigDecimal price,
                      Transport transport,
