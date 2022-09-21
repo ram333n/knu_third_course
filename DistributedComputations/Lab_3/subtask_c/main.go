@@ -12,6 +12,26 @@ type Components struct {
 	componentsArray [3]bool
 }
 
+func (c *Components) printComponents() string {
+	componentsName := [3]string{"tobacco", "paper", "match"}
+	result := ""
+	useDelimeter := true
+
+	for i := 0; i < len(c.componentsArray); i++ {
+		if !c.componentsArray[i] {
+			continue
+		}
+
+		result += componentsName[i]
+		if useDelimeter {
+			result += ", "
+			useDelimeter = false
+		}
+	}
+
+	return result
+}
+
 func generateComponent() (*Components, int) {
 	array := [3]bool{true, true, true}
 	idx := rand.Int() % len(array)
@@ -21,10 +41,10 @@ func generateComponent() (*Components, int) {
 
 func mediator(pingChanArray []chan *Components, isDone chan bool) {
 	for {
-		toPush, idx := generateComponent()
-		fmt.Println("Mediator generated : ", toPush.componentsArray)
-		pingChanArray[idx] <- toPush
 		<-isDone
+		toPush, idx := generateComponent()
+		fmt.Println("Mediator generated : ", toPush.printComponents())
+		pingChanArray[idx] <- toPush
 	}
 }
 
@@ -56,6 +76,9 @@ func main() {
 	go paperOwner.smoke(responseChan)
 	go matchOwner.smoke(responseChan)
 
+	responseChan <- true
+
 	for {
+		time.Sleep(1000 * time.Millisecond)
 	}
 }
