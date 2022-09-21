@@ -1,7 +1,6 @@
 package org.example;
 
 public class Pot {
-    public static int capacity = Constants.EATING_COUNT;
     private final int maxVolume;
     private int currentVolume;
 

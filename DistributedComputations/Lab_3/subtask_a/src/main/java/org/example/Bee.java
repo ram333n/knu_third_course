@@ -4,7 +4,7 @@ import static java.lang.Thread.sleep;
 
 public class Bee implements Runnable {
     private final Pot pot;
-    private Bear bear;
+    private final Bear bear;
 
     public Bee(Pot pot, Bear bear) {
         this.pot = pot;
@@ -13,7 +13,7 @@ public class Bee implements Runnable {
 
     @Override
     public void run() {
-        while (Pot.capacity > 0) {
+        while (true) {
             try {
                 pot.fill();
                 sleep(Constants.DURATION);

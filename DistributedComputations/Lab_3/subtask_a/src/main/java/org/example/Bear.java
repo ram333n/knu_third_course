@@ -11,10 +11,9 @@ public class Bear implements Runnable {
 
     @Override
     public void run() {
-        while(Pot.capacity > 0) {
+        while(true) {
             try {
                 pot.eatHoney();
-                Pot.capacity--;
                 sleep(Constants.DURATION);
                 System.out.println("Bear ate honey");
 
