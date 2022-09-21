@@ -1,7 +1,5 @@
 package org.example;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Pot {
     private final int maxVolume;
     private int currentVolume;
@@ -46,21 +44,27 @@ public class Pot {
     }
 
     public void fill() {
-        if(isFull()) {
-            System.out.println("Bee before wait");
-            waitEmpty();
-        }
-
+        boolean isFilled = false;
         synchronized (this) {
-            System.out.println(++currentVolume);
+            if(!isFull()) {
+                System.out.println(++currentVolume);
+
+                if(isFull()) {
+                    notifyFull();
+                }
+            } else {
+                isFilled = true;
+            }
         }
 
-        if(isFull()) {
-            notifyFull();
+        if(isFilled) {
+            System.out.println("Bee is waiting");
+            waitEmpty();
+            fill();
         }
     }
 
-    public synchronized boolean isFull() {
+    public boolean isFull() {
         return currentVolume == maxVolume;
     }
 
