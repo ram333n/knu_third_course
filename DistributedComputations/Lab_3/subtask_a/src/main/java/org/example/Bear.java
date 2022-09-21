@@ -1,7 +1,5 @@
 package org.example;
 
-import static java.lang.Thread.sleep;
-
 public class Bear implements Runnable {
     private final Pot pot;
 

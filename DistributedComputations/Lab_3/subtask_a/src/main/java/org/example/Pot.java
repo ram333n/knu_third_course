@@ -44,27 +44,28 @@ public class Pot {
     }
 
     public void fill() {
-        boolean isFilled = false;
-        synchronized (this) {
-            if(!isFull()) {
-                System.out.println(++currentVolume);
-
-                if(isFull()) {
-                    notifyFull();
-                }
-            } else {
-                isFilled = true;
-            }
-        }
-
-        if(isFilled) {
+        if(checkAndFill()) {
             System.out.println("Bee is waiting");
             waitEmpty();
             fill();
         }
     }
 
-    public boolean isFull() {
+    private synchronized boolean checkAndFill() {
+        if(!isFull()) {
+            //System.out.println(++currentVolume);
+
+            if(isFull()) {
+                notifyFull();
+            }
+        } else {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isFull() {
         return currentVolume == maxVolume;
     }
 
