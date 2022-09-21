@@ -1,45 +1,80 @@
 package org.example;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Pot {
     private final int maxVolume;
     private int currentVolume;
+    final Object fullMonitor = new Object();
+    final Object emptyMonitor = new Object();
 
     public Pot(int maxVolume) {
         this.maxVolume = maxVolume;
         this.currentVolume = 0;
     }
 
-    public synchronized void fill() {
-        if(isFull()) {
+    public void waitFull() {
+        synchronized (fullMonitor) {
             try {
-                wait();
+                fullMonitor.wait();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
 
-        currentVolume++;
-
-        if(isFull()) {
-            notifyAll();
+    public void notifyFull() {
+        synchronized (fullMonitor) {
+            fullMonitor.notifyAll();
         }
     }
 
-    public boolean isFull() {
+    public void waitEmpty() {
+        synchronized (emptyMonitor) {
+            try {
+                emptyMonitor.wait();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public void notifyEmpty() {
+        synchronized (emptyMonitor) {
+            emptyMonitor.notifyAll();
+        }
+    }
+
+    public void fill() {
+        if(isFull()) {
+            System.out.println("Bee before wait");
+            waitEmpty();
+        }
+
+        synchronized (this) {
+            System.out.println(++currentVolume);
+        }
+
+        if(isFull()) {
+            notifyFull();
+        }
+    }
+
+    public synchronized boolean isFull() {
         return currentVolume == maxVolume;
     }
 
-    public synchronized void eatHoney() {
-        if(!isFull()) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+    public void eatHoney() {
+        try {
+            Thread.sleep((long)(Constants.DURATION * 9.5));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
-        currentVolume = 0;
+        synchronized (this) {
+            currentVolume = 0;
+        }
 
-        notifyAll();
+        notifyEmpty();
     }
 }

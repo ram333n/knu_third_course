@@ -12,14 +12,10 @@ public class Bear implements Runnable {
     @Override
     public void run() {
         while(true) {
-            try {
-                pot.eatHoney();
-                sleep(Constants.DURATION);
-                System.out.println("Bear ate honey");
-
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            pot.waitFull();
+            System.out.println("Bear woke up");
+            pot.eatHoney();
+            System.out.println("Bear ate honey");
         }
     }
 }

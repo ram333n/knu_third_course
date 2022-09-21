@@ -15,8 +15,8 @@ public class Bee implements Runnable {
     public void run() {
         while (true) {
             try {
-                pot.fill();
                 sleep(Constants.DURATION);
+                pot.fill();
                 System.out.printf("Bee with id %d filled pot%n", Thread.currentThread().getId());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
