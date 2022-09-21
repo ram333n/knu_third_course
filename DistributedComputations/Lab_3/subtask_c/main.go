@@ -39,9 +39,9 @@ func generateComponent() (*Components, int) {
 	return &Components{array}, idx
 }
 
-func mediator(pingChanArray []chan *Components, isDone chan bool) {
+func mediator(pingChanArray []chan *Components, semaphore chan bool) {
 	for {
-		<-isDone
+		semaphore <- true
 		toPush, idx := generateComponent()
 		fmt.Println("Mediator generated : ", toPush.printComponents())
 		pingChanArray[idx] <- toPush
@@ -53,13 +53,13 @@ type Smoker struct {
 	mediatorChan chan *Components
 }
 
-func (smoker *Smoker) smoke(responseChan chan<- bool) {
+func (smoker *Smoker) smoke(semaphore chan bool) {
 	for {
 		<-smoker.mediatorChan
 		fmt.Printf("%s started smoking...\n", smoker.name)
 		time.Sleep(Duration * time.Millisecond)
 		fmt.Printf("%s finished smoking...\n", smoker.name)
-		responseChan <- true
+		<-semaphore
 	}
 }
 
@@ -68,15 +68,13 @@ func main() {
 	paperOwner := Smoker{"Paper owner", make(chan *Components)}
 	matchOwner := Smoker{"Match owner", make(chan *Components)}
 
-	responseChan := make(chan bool, 1)
+	semaphore := make(chan bool, 1)
 	pingChanArray := []chan *Components{tobaccoOwner.mediatorChan, paperOwner.mediatorChan, matchOwner.mediatorChan}
 
-	go mediator(pingChanArray, responseChan)
-	go tobaccoOwner.smoke(responseChan)
-	go paperOwner.smoke(responseChan)
-	go matchOwner.smoke(responseChan)
-
-	responseChan <- true
+	go mediator(pingChanArray, semaphore)
+	go tobaccoOwner.smoke(semaphore)
+	go paperOwner.smoke(semaphore)
+	go matchOwner.smoke(semaphore)
 
 	for {
 		time.Sleep(1000 * time.Millisecond)
