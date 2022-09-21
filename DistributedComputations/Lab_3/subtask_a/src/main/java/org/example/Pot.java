@@ -53,7 +53,7 @@ public class Pot {
 
     private synchronized boolean checkAndFill() {
         if(!isFull()) {
-            //System.out.println(++currentVolume);
+            System.out.println(++currentVolume);
 
             if(isFull()) {
                 notifyFull();
