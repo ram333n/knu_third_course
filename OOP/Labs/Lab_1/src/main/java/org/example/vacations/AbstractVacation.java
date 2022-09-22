@@ -11,7 +11,6 @@ import java.time.LocalDate;
 
 @AllArgsConstructor
 @Getter
-@Setter
 public abstract class AbstractVacation {
     protected final String description;
     protected final BigDecimal price;

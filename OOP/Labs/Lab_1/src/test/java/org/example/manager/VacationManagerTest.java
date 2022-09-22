@@ -61,7 +61,7 @@ class VacationManagerTest {
                           14,
                           false),
 
-            new Excursion("Excursion to burnt moskva",
+            new Excursion("Excursion to burnt moscow",
                           BigDecimal.valueOf(0),
                           new Plane("An-225 Mriya"),
                           LocalDate.now(),

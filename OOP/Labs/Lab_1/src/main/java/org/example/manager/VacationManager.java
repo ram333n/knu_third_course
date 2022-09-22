@@ -55,6 +55,6 @@ public class VacationManager {
             }
         }
 
-        return null; // TODO : think how to replace it
+        return null;
     }
 }
