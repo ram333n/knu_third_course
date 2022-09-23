@@ -4,11 +4,9 @@ import static java.lang.Thread.sleep;
 
 public class Bee implements Runnable {
     private final Pot pot;
-    private final Bear bear;
 
-    public Bee(Pot pot, Bear bear) {
+    public Bee(Pot pot) {
         this.pot = pot;
-        this.bear = bear;
     }
 
     @Override

@@ -9,7 +9,7 @@ public class Main {
         Thread[] bees = new Thread[Constants.BEES_COUNT];
 
         for(int i = 0; i < bees.length; i++) {
-            bees[i] = new Thread(new Bee(pot, bear));
+            bees[i] = new Thread(new Bee(pot));
         }
 
         bearThread.start();

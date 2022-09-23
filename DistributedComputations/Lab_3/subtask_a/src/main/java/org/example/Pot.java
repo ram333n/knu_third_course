@@ -53,7 +53,7 @@ public class Pot {
 
     private synchronized boolean checkAndFill() {
         if(!isFull()) {
-            System.out.println(++currentVolume);
+            ++currentVolume;
 
             if(isFull()) {
                 notifyFull();
@@ -71,7 +71,7 @@ public class Pot {
 
     public void eatHoney() {
         try {
-            Thread.sleep((long)(Constants.DURATION * 9.5));
+            Thread.sleep((long)(Constants.DURATION * 5));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
