@@ -15,9 +15,10 @@ DT = 0.01
 class Model:
     def __init__(self, signals, time, dt):
         self.signals = signals
-        self.signals_count = signals.size
+        self.signals_count = signals.shape[0]
         self.time = time
         self.dt = dt
+        self.time_points = np.arange(0, self.time + self.dt, self.dt)
         self.transformed_signals = fft.fft(signals)
         self.frequencies = fft.fftfreq(self.signals_count, dt)[:self.signals_count // 2]
 
@@ -32,9 +33,31 @@ class Model:
         return extremumus / self.time
 
     def find_koefs(self):
-        # TODO
+        frequencies = self.find_max_frequencies()
+
+        b = np.array([
+            np.sum(self.signals * self.time_points ** 3),
+            np.sum(self.signals * self.time_points ** 2),
+            np.sum(self.signals * self.time_points),
+            np.sum(self.signals * np.sin(2. * np.pi * frequencies[0][0] * self.time_points)),
+            np.sum(self.signals)
+        ])
+
+        a = np.zeros((b.shape[0], b.shape[0]))
+
+        func = [self.time_points ** 3,
+                self.time_points ** 2,
+                self.time_points,
+                np.sin(2. * np.pi * frequencies[0][0] * self.time_points),
+                np.ones(self.signals_count)]
+
+        for i in range(b.shape[0]):
+            for j in range(b.shape[0]):
+                a[i, j] = np.sum(func[i] * func[j])
+
+        return np.matmul(np.linalg.inv(a), b)
 
 
 model = Model(SIGNALS, TIME, DT)
 model.plot_fourier_transform()
-print(model.find_max_frequencies())
+print(f"Koefs : {model.find_koefs()}")
