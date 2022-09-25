@@ -32,9 +32,7 @@ class Model:
         return extremumus / self.time
 
     def find_koefs(self):
-        b = np.array([
-
-        ])
+        # TODO
 
 
 model = Model(SIGNALS, TIME, DT)
