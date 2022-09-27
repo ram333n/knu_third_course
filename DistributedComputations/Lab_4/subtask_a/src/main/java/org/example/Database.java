@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.util.Constants;
+
 import java.io.*;
 import java.util.*;
 import java.util.function.Function;
@@ -33,9 +35,9 @@ public class Database {
     public List<User> delete(Predicate<User> predicate) throws InterruptedException {
         try {
             lock.writeLock();
-            int sizeBefore = users.size();
+            Thread.sleep(2 * Constants.DURATION);
             List<User> result = users.stream()
-                            .filter((user) -> !predicate.test(user))
+                            .filter(predicate)
                             .collect(Collectors.toList());
 
             if(users.removeIf(predicate)) {
@@ -56,6 +58,7 @@ public class Database {
 
     public void write(User user) throws InterruptedException {
         lock.writeLock();
+        Thread.sleep(2 * Constants.DURATION);
         try(FileWriter writer = new FileWriter(fileName, true)) {
             users.add(user);
             writer.append(user.toString());
@@ -70,6 +73,7 @@ public class Database {
                                    Function<User, String> mappingFunction) throws InterruptedException {
         try {
             lock.readLock();
+            Thread.sleep(Constants.DURATION);
             Optional<User> found = users.stream()
                     .filter(predicate)
                     .findFirst();

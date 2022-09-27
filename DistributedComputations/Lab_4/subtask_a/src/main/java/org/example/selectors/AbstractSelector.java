@@ -25,7 +25,9 @@ public abstract class AbstractSelector implements Runnable {
                         queryResult);
 
             } else {
-                System.out.printf("%s didn't find any record%n", getClass().getSimpleName());
+                System.out.printf("%s didn't find(parameter = %s) any record%n",
+                        getClass().getSimpleName(),
+                        queryParameter);
             }
         }
     }
