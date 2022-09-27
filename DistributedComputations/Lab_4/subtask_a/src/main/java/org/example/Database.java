@@ -1,11 +1,10 @@
 package org.example;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Database {
     private final List<User> users;
@@ -21,41 +20,25 @@ public class Database {
         System.out.println(users);
     }
 
-    public String findByName(String name) throws InterruptedException {
-        try {
-            lock.readLock();
-            Optional<User> found = users.stream()
-                    .filter(current -> name.equals(current.getFullName()))
-                    .findFirst();
-
-            return found.map(User::getPhoneNumber).orElse(null);
-        } finally {
-            lock.readUnlock();
-        }
+    public String getPhoneNumberByName(String name) throws InterruptedException {
+        return findByPredicate((user -> Objects.equals(user.getFullName(), name)),
+                User::getPhoneNumber);
     }
 
-    public String findByPhoneNumber(String phoneNumber) throws InterruptedException {
-        try {
-            lock.readLock();
-            Optional<User> found = users.stream()
-                    .filter(current -> phoneNumber.equals(current.getPhoneNumber()))
-                    .findFirst();
-
-            lock.readUnlock();
-            return found.map(User::getFullName).orElse(null);
-        } finally {
-            lock.readUnlock();
-        }
+    public String getNameByPhoneNumber(String phoneNumber) throws InterruptedException {
+        return findByPredicate((user -> Objects.equals(user.getPhoneNumber(), phoneNumber)),
+                User::getFullName);
     }
 
-    public boolean delete(Predicate<User> predicate) throws InterruptedException {
+    public List<User> delete(Predicate<User> predicate) throws InterruptedException {
         try {
             lock.writeLock();
             int sizeBefore = users.size();
-            users.removeIf(predicate);
-            boolean isModified = sizeBefore != users.size();
+            List<User> result = users.stream()
+                            .filter((user) -> !predicate.test(user))
+                            .collect(Collectors.toList());
 
-            if(isModified) {
+            if(users.removeIf(predicate)) {
                 try(FileWriter writer = new FileWriter(fileName, false)) {
                     for(User user : users) {
                         writer.write(user.toString());
@@ -65,7 +48,7 @@ public class Database {
                 }
             }
 
-            return isModified;
+            return result;
         } finally {
             lock.writeUnlock();
         }
@@ -73,13 +56,27 @@ public class Database {
 
     public void write(User user) throws InterruptedException {
         lock.writeLock();
-        try(FileWriter writer = new FileWriter(fileName, true);) {
+        try(FileWriter writer = new FileWriter(fileName, true)) {
             users.add(user);
             writer.append(user.toString());
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
             lock.writeUnlock();
+        }
+    }
+
+    private String findByPredicate(Predicate<User> predicate,
+                                   Function<User, String> mappingFunction) throws InterruptedException {
+        try {
+            lock.readLock();
+            Optional<User> found = users.stream()
+                    .filter(predicate)
+                    .findFirst();
+
+            return found.map(mappingFunction).orElse(null);
+        } finally {
+            lock.readUnlock();
         }
     }
 

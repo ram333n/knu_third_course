@@ -1,5 +1,7 @@
 package org.example;
 
+import org.example.util.PathBuilder;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         Database database = new Database(PathBuilder.getPath(".", "src", "main", "java", "org", "example", "database.txt"));
