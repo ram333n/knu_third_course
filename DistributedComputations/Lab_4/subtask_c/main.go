@@ -15,12 +15,12 @@ type Route struct {
 }
 
 type Graph struct {
-	adjacencyList map[string][]Route
+	adjacencyList map[string][]*Route
 	lock          sync.RWMutex
 }
 
 func (graph *Graph) initialize() {
-	graph.adjacencyList = make(map[string][]Route)
+	graph.adjacencyList = make(map[string][]*Route)
 }
 
 func (graph *Graph) getRoute(from, to string) (*Route, int) {
@@ -28,19 +28,19 @@ func (graph *Graph) getRoute(from, to string) (*Route, int) {
 		return nil, -1
 	}
 
-	var resultTicket *Route = nil
+	var resultRoute *Route = nil
 	var resultIdx int = -1
 
 	for i := 0; i < len(graph.adjacencyList[from]); i++ {
 		current := graph.adjacencyList[from][i]
 		if current.destination == to {
-			resultTicket = &current
+			resultRoute = current
 			resultIdx = i
 			break
 		}
 	}
 
-	return resultTicket, resultIdx
+	return resultRoute, resultIdx
 }
 
 func (graph *Graph) addCity(name string) bool {
@@ -48,7 +48,7 @@ func (graph *Graph) addCity(name string) bool {
 		return false
 	}
 
-	graph.adjacencyList[name] = make([]Route, 0)
+	graph.adjacencyList[name] = make([]*Route, 0)
 
 	return true
 }
@@ -56,12 +56,12 @@ func (graph *Graph) addCity(name string) bool {
 func (graph *Graph) addRoute(from, to string, price int) bool {
 	_, routeIdx := graph.getRoute(from, to)
 
-	if routeIdx != -1 || graph.adjacencyList[from] == nil {
+	if routeIdx != -1 || graph.adjacencyList[from] == nil || (from == to) {
 		return false
 	}
 
-	graph.adjacencyList[from] = append(graph.adjacencyList[from], Route{to, price})
-	graph.adjacencyList[to] = append(graph.adjacencyList[to], Route{from, price})
+	graph.adjacencyList[from] = append(graph.adjacencyList[from], &Route{to, price})
+	graph.adjacencyList[to] = append(graph.adjacencyList[to], &Route{from, price})
 
 	return true
 }
@@ -84,7 +84,7 @@ func (graph *Graph) removeCity(city string) bool {
 		graph.removeRoute(currentCity, city)
 	}
 
-	graph.adjacencyList[city] = nil
+	delete(graph.adjacencyList, city) //TODO
 
 	return true
 }
@@ -104,8 +104,6 @@ func (graph *Graph) removeRoute(from, to string) bool {
 	return true
 }
 
-var expected *Route
-
 func (graph *Graph) editRoutePrice(from, to string, newPrice int) bool {
 	routeTo, _ := graph.getRoute(from, to)
 
@@ -117,7 +115,6 @@ func (graph *Graph) editRoutePrice(from, to string, newPrice int) bool {
 
 	routeTo.price = newPrice
 	routeFrom.price = newPrice
-	expected = routeTo
 
 	return true
 }
@@ -134,32 +131,66 @@ func (graph *Graph) print() {
 	}
 }
 
+func priceEditor(graph *Graph, cities []string) {
+	from := cities[rand.Int()%len(cities)]
+	to := cities[rand.Int()%len(cities)]
+
+	if from == to {
+		fmt.Println("PriceEditor: there isn't loop edges")
+		return
+	}
+
+	route, _ := graph.getRoute(from, to)
+	if route == nil {
+		if graph.adjacencyList[from] == nil || graph.adjacencyList[to] == nil {
+			fmt.Printf("PriceEditor: there isn't %s or %s in graph\n", from, to)
+		} else {
+			fmt.Printf("PriceEditor: there isn't route from %s to %s\n", from, to)
+		}
+	} else {
+		oldPrice := route.price
+		newPrice := rand.Intn(2000)
+		graph.editRoutePrice(from, to, newPrice)
+		fmt.Printf("PriceEditor: changed newPrice from %s to %s(before = %d, after = %d)\n", from, to, oldPrice, newPrice)
+	}
+}
+
 func performPriceEditor(graph *Graph, cities []string) {
 	for {
 		graph.lock.Lock()
 		time.Sleep(Duration * time.Second)
-
-		from := cities[rand.Int()%len(cities)]
-		to := cities[rand.Int()%len(cities)]
-
-		if from != to {
-			route, _ := graph.getRoute(from, to)
-			if route == nil {
-				fmt.Printf("PriceEditor: there isn't %s or %s in graph\n", from, to)
-			} else {
-				oldPrice := route.price
-				newPrice := rand.Intn(2000)
-				if graph.editRoutePrice(from, to, newPrice) {
-					fmt.Printf("PriceEditor: changed newPrice from %s to %s(before = %d, after = %d)\n", from, to, oldPrice, newPrice)
-				} else {
-					fmt.Printf("PriceEditor: there isn't route from %s to %s\n", from, to)
-				}
-			}
-		} else {
-			fmt.Println("PriceEditor: there isn't loop edges")
-		}
-
+		priceEditor(graph, cities)
 		graph.lock.Unlock()
+	}
+}
+
+func routeEditor(graph *Graph, cities []string) {
+	from := cities[rand.Int()%len(cities)]
+	to := cities[rand.Int()%len(cities)]
+	toRemove := rand.Intn(2)%2 == 0
+
+	if toRemove {
+		if graph.removeRoute(from, to) {
+			fmt.Printf("RouteEditor: removed route from %s to %s\n", from, to)
+		} else {
+			fmt.Printf("RouteEditor: there isn't route from %s to %s\n", from, to)
+		}
+	} else {
+		price := rand.Intn(2000)
+
+		if graph.addRoute(from, to, price) {
+			fmt.Printf("RouteEditor: added route from %s to %s, price: %d\n", from, to, price)
+		} else {
+			route, _ := graph.getRoute(from, to)
+
+			if route != nil {
+				fmt.Printf("RouteEditor: the route from %s to %s already exists\n", from, to)
+			} else if graph.adjacencyList[from] == nil || graph.adjacencyList[to] == nil {
+				fmt.Printf("RouteEditor: there isn't %s or %s in graph\n", from, to)
+			} else {
+				fmt.Printf("RouteEditor: something went wrong\n")
+			}
+		}
 	}
 }
 
@@ -167,34 +198,28 @@ func performRouteEditor(graph *Graph, cities []string) {
 	for {
 		graph.lock.Lock()
 		time.Sleep(Duration * time.Second)
-
-		from := cities[rand.Int()%len(cities)]
-		to := cities[rand.Int()%len(cities)]
-		toRemove := rand.Intn(2)%2 == 0
-
-		if toRemove {
-			if graph.removeRoute(from, to) {
-				fmt.Printf("RouteEditor: removed route from %s to %s\n", from, to)
-			} else {
-				fmt.Printf("RouteEditor: there isn't route from %s to %s\n", from, to)
-			}
-		} else {
-			price := rand.Intn(2000)
-
-			if graph.addRoute(from, to, price) {
-				fmt.Printf("RouteEditor: added route from %s to %s, price: %d\n", from, to, price)
-			} else {
-				route, _ := graph.getRoute(from, to)
-
-				if route != nil {
-					fmt.Printf("RouteEditor: the route from %s to %s already exists\n", from, to)
-				} else {
-					fmt.Printf("RouteEditor: there isn't %s or %s in graph\n", from, to)
-				}
-			}
-		}
-
+		routeEditor(graph, cities)
 		graph.lock.Unlock()
+	}
+}
+
+func cityEditor(graph *Graph, cities []string) {
+	city := cities[rand.Int()%len(cities)]
+	toRemove := rand.Intn(2)%2 == 0
+
+	if toRemove {
+		if graph.removeCity(city) {
+			fmt.Printf("CityEditor: successfully removed %s city\n", city)
+			//graph.print()
+		} else {
+			fmt.Printf("CityEditor: %s doesn't exist\n", city)
+		}
+	} else {
+		if graph.addCity(city) {
+			fmt.Printf("CityEditor: successfully added %s city\n", city)
+		} else {
+			fmt.Printf("CityEditor: %s already exists\n", city)
+		}
 	}
 }
 
@@ -202,25 +227,20 @@ func performCityEditor(graph *Graph, cities []string) {
 	for {
 		graph.lock.Lock()
 		time.Sleep(Duration * time.Second)
-
-		city := cities[rand.Int()%len(cities)]
-		toRemove := rand.Intn(2)%2 == 0
-
-		if toRemove {
-			if graph.removeCity(city) {
-				fmt.Printf("CityEditor: successfully removed %s city\n", city)
-			} else {
-				fmt.Printf("CityEditor: %s doesn't exist\n", city)
-			}
-		} else {
-			if graph.addCity(city) {
-				fmt.Printf("CityEditor: successfully added %s city\n", city)
-			} else {
-				fmt.Printf("CityEditor: %s already exists\n", city)
-			}
-		}
-
+		cityEditor(graph, cities)
 		graph.lock.Unlock()
+	}
+}
+
+func routeFinder(graph *Graph, cities []string) {
+	from := cities[rand.Int()%len(cities)]
+	to := cities[rand.Int()%len(cities)]
+	route, _ := graph.getRoute(from, to)
+
+	if route != nil {
+		fmt.Printf("RouteFinder: found route from %s to %s, price: %d\n", from, to, route.price)
+	} else {
+		fmt.Printf("RouteFinder: there isn't route from %s to %s\n", from, to)
 	}
 }
 
@@ -228,17 +248,7 @@ func performRouteFinder(graph *Graph, cities []string) {
 	for {
 		graph.lock.RLock()
 		time.Sleep(Duration * time.Second)
-
-		from := cities[rand.Int()%len(cities)]
-		to := cities[rand.Int()%len(cities)]
-		route, _ := graph.getRoute(from, to)
-
-		if route != nil {
-			fmt.Printf("RouteFinder: found route from %s to %s, price: %d\n", from, to, route.price)
-		} else {
-			fmt.Printf("RouteFinder: there isn't route from %s to %s\n", from, to)
-		}
-
+		routeFinder(graph, cities)
 		graph.lock.RUnlock()
 	}
 }
@@ -254,21 +264,20 @@ func main() {
 
 	graph.addRoute("Kyiv", "Odesa", 1)
 	graph.addRoute("Kyiv", "Kharkiv", 2)
-	graph.addRoute("Kyiv", "Lviv", 3)
+	graph.addRoute("Odesa", "Lviv", 3)
 	graph.addRoute("Kharkiv", "Lviv", 4)
+	graph.addRoute("Kyiv", "Lviv", 5)
 
-	graph.editRoutePrice("Kharkiv", "Lviv", 143)
-	fromRoute, _ := graph.getRoute("Kharkiv", "Lviv")
-	toRoute, _ := graph.getRoute("Lviv", "Kharkiv")
-	fmt.Println(fromRoute.price)
-	fmt.Println(toRoute.price)
+	//graph.editRoutePrice("Kharkiv", "Lviv", 143)
+	//fromRoute, _ := graph.getRoute("Kharkiv", "Lviv")
+	//toRoute, _ := graph.getRoute("Lviv", "Kharkiv")
+	//fmt.Println(fromRoute.price)
+	//fmt.Println(toRoute.price)
 
-	//go performPriceEditor(&graph, cities)
-	//go performRouteEditor(&graph, cities)
-	//go performCityEditor(&graph, cities)
-	//go performRouteFinder(&graph, cities)
-
-	//fmt.Println(graph.addRoute("Kharkiv", "Lviv", 1337))
+	go performPriceEditor(&graph, cities)
+	go performRouteEditor(&graph, cities)
+	go performCityEditor(&graph, cities)
+	go performRouteFinder(&graph, cities)
 
 	for {
 	}
