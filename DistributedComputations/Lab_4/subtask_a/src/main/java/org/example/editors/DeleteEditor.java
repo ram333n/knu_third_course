@@ -2,6 +2,7 @@ package org.example.editors;
 
 import org.example.Database;
 import org.example.User;
+import org.example.util.Constants;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -19,6 +20,7 @@ public class DeleteEditor implements Runnable {
     public void run() {
         while(true) {
             try {
+                Thread.sleep(3 * Constants.DURATION);
                 List<User> deletedUsers = database.delete(predicate);
 
                 if(!deletedUsers.isEmpty()) {

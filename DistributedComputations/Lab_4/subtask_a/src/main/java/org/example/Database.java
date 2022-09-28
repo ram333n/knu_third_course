@@ -35,12 +35,12 @@ public class Database {
     public List<User> delete(Predicate<User> predicate) throws InterruptedException {
         try {
             lock.writeLock();
-            Thread.sleep(2 * Constants.DURATION);
             List<User> result = users.stream()
                             .filter(predicate)
                             .collect(Collectors.toList());
 
-            if(users.removeIf(predicate)) {
+            if(users.removeAll(result)) {
+                System.out.println("ACTUAL : " + users);
                 try(FileWriter writer = new FileWriter(fileName, false)) {
                     for(User user : users) {
                         writer.write(user.toString());
@@ -58,7 +58,6 @@ public class Database {
 
     public void write(User user) throws InterruptedException {
         lock.writeLock();
-        Thread.sleep(2 * Constants.DURATION);
         try(FileWriter writer = new FileWriter(fileName, true)) {
             users.add(user);
             writer.append(user.toString());
@@ -73,7 +72,6 @@ public class Database {
                                    Function<User, String> mappingFunction) throws InterruptedException {
         try {
             lock.readLock();
-            Thread.sleep(Constants.DURATION);
             Optional<User> found = users.stream()
                     .filter(predicate)
                     .findFirst();
