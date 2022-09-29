@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const Duration = 5
+const Duration = 1
 
 type Route struct {
 	destination string
@@ -56,7 +56,7 @@ func (graph *Graph) addCity(name string) bool {
 func (graph *Graph) addRoute(from, to string, price int) bool {
 	_, routeIdx := graph.getRoute(from, to)
 
-	if routeIdx != -1 || graph.adjacencyList[from] == nil || (from == to) {
+	if routeIdx != -1 || graph.adjacencyList[from] == nil || graph.adjacencyList[to] == nil || (from == to) {
 		return false
 	}
 
@@ -66,9 +66,8 @@ func (graph *Graph) addRoute(from, to string, price int) bool {
 	return true
 }
 
-func removeByIndex[T any](slice []T, i int) []T {
-	slice[i] = slice[len(slice)-1]
-	return slice[:len(slice)-1]
+func removeByIndex[T any](slice []T, i int) []T { //TODO remove that shit!!!
+	return append(slice[:i], slice[i+1:]...)
 }
 
 func (graph *Graph) removeCity(city string) bool {
@@ -187,8 +186,6 @@ func routeEditor(graph *Graph, cities []string) {
 				fmt.Printf("RouteEditor: the route from %s to %s already exists\n", from, to)
 			} else if graph.adjacencyList[from] == nil || graph.adjacencyList[to] == nil {
 				fmt.Printf("RouteEditor: there isn't %s or %s in graph\n", from, to)
-			} else {
-				fmt.Printf("RouteEditor: something went wrong\n")
 			}
 		}
 	}
@@ -254,7 +251,7 @@ func performRouteFinder(graph *Graph, cities []string) {
 }
 
 func main() {
-	cities := []string{"Kyiv", "Odesa", "Kharkiv", "Lviv"}
+	cities := []string{"Kyiv", "Odesa", "Lviv"}
 	graph := Graph{}
 	graph.initialize()
 
@@ -268,16 +265,20 @@ func main() {
 	graph.addRoute("Kharkiv", "Lviv", 4)
 	graph.addRoute("Kyiv", "Lviv", 5)
 
+	//graph.removeCity("Kharkiv")
+	//graph.addRoute("Kharkiv", "Lviv", 4)
+
+	graph.print()
 	//graph.editRoutePrice("Kharkiv", "Lviv", 143)
 	//fromRoute, _ := graph.getRoute("Kharkiv", "Lviv")
 	//toRoute, _ := graph.getRoute("Lviv", "Kharkiv")
 	//fmt.Println(fromRoute.price)
 	//fmt.Println(toRoute.price)
 
-	go performPriceEditor(&graph, cities)
-	go performRouteEditor(&graph, cities)
-	go performCityEditor(&graph, cities)
-	go performRouteFinder(&graph, cities)
+	//go performPriceEditor(&graph, cities)
+	//go performRouteEditor(&graph, cities)
+	//go performCityEditor(&graph, cities)
+	//go performRouteFinder(&graph, cities)
 
 	for {
 	}
