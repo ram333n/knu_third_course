@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const Duration = 1
+const Duration = 5
 
 type Route struct {
 	destination string
@@ -251,7 +251,7 @@ func performRouteFinder(graph *Graph, cities []string) {
 }
 
 func main() {
-	cities := []string{"Kyiv", "Odesa", "Lviv"}
+	cities := []string{"Kyiv", "Odesa", "Lviv", "Kharkiv"}
 	graph := Graph{}
 	graph.initialize()
 
@@ -268,17 +268,17 @@ func main() {
 	//graph.removeCity("Kharkiv")
 	//graph.addRoute("Kharkiv", "Lviv", 4)
 
-	graph.print()
+	//graph.print()
 	//graph.editRoutePrice("Kharkiv", "Lviv", 143)
 	//fromRoute, _ := graph.getRoute("Kharkiv", "Lviv")
 	//toRoute, _ := graph.getRoute("Lviv", "Kharkiv")
 	//fmt.Println(fromRoute.price)
 	//fmt.Println(toRoute.price)
 
-	//go performPriceEditor(&graph, cities)
-	//go performRouteEditor(&graph, cities)
-	//go performCityEditor(&graph, cities)
-	//go performRouteFinder(&graph, cities)
+	go performPriceEditor(&graph, cities)
+	go performRouteEditor(&graph, cities)
+	go performCityEditor(&graph, cities)
+	go performRouteFinder(&graph, cities)
 
 	for {
 	}
