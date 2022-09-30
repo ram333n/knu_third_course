@@ -12,13 +12,14 @@ public class CustomReentrantLock {
         if(holdCount == 0) {
             holdCount++;
             currentThreadId = Thread.currentThread().getId();
-        } else if (holdCount > 0 && currentThreadId == Thread.currentThread().getId()) {
-            holdCount++;
-        } else  {
+        } else {
             try {
-                wait();
+                while(currentThreadId != Thread.currentThread().getId()) {
+                    wait();
+                    currentThreadId = Thread.currentThread().getId();
+                }
+
                 holdCount++;
-                currentThreadId = Thread.currentThread().getId();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
