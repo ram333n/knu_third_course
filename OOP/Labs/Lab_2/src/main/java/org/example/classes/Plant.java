@@ -1,5 +1,6 @@
 package org.example.classes;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Plant {
+    @Setter(AccessLevel.NONE)
+    private final int id;
+
     private String name;
     private Soil soil;
     private String origin;
