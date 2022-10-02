@@ -1,6 +1,6 @@
 package org.example.util;
 
-public class XMLTags {
+public final class XMLTags {
     private XMLTags() {}
 
     public static final String ORANGERY = "Orangery";
