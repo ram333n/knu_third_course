@@ -8,7 +8,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class Plant {
+public class Flower {
     @Setter(AccessLevel.NONE)
     private final int id;
 
