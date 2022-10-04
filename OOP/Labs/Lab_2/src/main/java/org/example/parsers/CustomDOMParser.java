@@ -3,6 +3,7 @@ package org.example.parsers;
 import org.example.classes.Flower;
 import org.example.handlers.OrangeryHandler;
 import org.example.util.PathBuilder;
+import org.example.util.XMLTags;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -24,7 +25,7 @@ public class CustomDOMParser implements Parser {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document document = builder.parse(new File(pathToXML));
             document.getDocumentElement().normalize();
-            NodeList nodeList = document.getElementsByTagName("Flower");
+            NodeList nodeList = document.getElementsByTagName(XMLTags.FLOWER);
             OrangeryHandler handler = new OrangeryHandler();
 
             for(int i = 0; i < nodeList.getLength(); i++) {

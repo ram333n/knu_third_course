@@ -2,7 +2,9 @@ package org.example.handlers;
 
 import org.example.classes.*;
 import org.example.util.XMLTags;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -30,7 +32,15 @@ public class OrangeryHandler extends DefaultHandler {
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        instantiateSubclass(qName);
+        if(qName.equals("Flower")) {
+            orangery.add(new Flower());
+        }
+
+        if(attributes != null) {
+            for(int i = 0; i < attributes.getLength(); i++) {
+                setField(attributes.getQName(i), attributes.getValue(i));
+            }
+        }
     }
 
     @Override
@@ -39,43 +49,28 @@ public class OrangeryHandler extends DefaultHandler {
     }
 
     public void addDataByDOMElement(Element element) {
-        if(orangery == null) {
-            orangery = new ArrayList<>();
+        createEmptyFlower();
+
+        NamedNodeMap attributes = element.getAttributes();
+
+        for (int i = 0; i < attributes.getLength(); i++) {
+            Attr currentAttribute = (Attr) attributes.item(i);
+            setField(currentAttribute.getName(), currentAttribute.getValue());
         }
 
-        orangery.add(new Flower());
-
-        setField("id", element.getElementsByTagName("id").item(0).getTextContent());
         setField("name", element.getElementsByTagName("name").item(0).getTextContent());
         setField("soil", element.getElementsByTagName("soil").item(0).getTextContent());
         setField("origin", element.getElementsByTagName("origin").item(0).getTextContent());
 
-        instantiateSubclass("visualParameters");
-
         setField("stemColor", element.getElementsByTagName("stemColor").item(0).getTextContent());
         setField("leavesColor", element.getElementsByTagName("leavesColor").item(0).getTextContent());
         setField("averageSize", element.getElementsByTagName("averageSize").item(0).getTextContent());
-
-        instantiateSubclass("growingTips");
 
         setField("temperature", element.getElementsByTagName("temperature").item(0).getTextContent());
         setField("isLightLoving", element.getElementsByTagName("isLightLoving").item(0).getTextContent());
         setField("waterAmount", element.getElementsByTagName("waterAmount").item(0).getTextContent());
 
         setField("multiplying", element.getElementsByTagName("multiplying").item(0).getTextContent());
-    }
-
-    private void instantiateSubclass(String qName) {
-        switch (qName) {
-            case XMLTags.FLOWER ->
-                    orangery.add(new Flower());
-
-            case XMLTags.VISUAL_PARAMETERS ->
-                    getLast().setVisualParameters(new VisualParameters());
-
-            case XMLTags.GROWING_TIPS ->
-                    getLast().setGrowingTips(new GrowingTips());
-        }
     }
 
     public void setField(String qName, String value) {
@@ -114,7 +109,15 @@ public class OrangeryHandler extends DefaultHandler {
                     getLast().setMultiplying(Multiplying.valueOf(value));
         }
     }
-    
+
+    public void createEmptyFlower() {
+        if(orangery == null) {
+            orangery = new ArrayList<>();
+        }
+
+        orangery.add(new Flower());
+    }
+
     public List<Flower> getOrangery() {
         return new ArrayList<>(orangery);
     }

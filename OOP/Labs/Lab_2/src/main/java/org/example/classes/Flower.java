@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 public class Flower {
@@ -17,6 +16,11 @@ public class Flower {
     private VisualParameters visualParameters;
     private GrowingTips growingTips;
     private Multiplying multiplying;
+
+    public Flower() {
+        this.visualParameters = new VisualParameters();
+        this.growingTips = new GrowingTips();
+    }
 
     @Override
     public String toString() {
