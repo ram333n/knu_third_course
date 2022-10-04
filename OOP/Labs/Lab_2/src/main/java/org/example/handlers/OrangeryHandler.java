@@ -30,54 +30,12 @@ public class OrangeryHandler extends DefaultHandler {
 
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        switch (qName) {
-            case XMLTags.FLOWER ->
-                orangery.add(new Flower());
-
-            case XMLTags.VISUAL_PARAMETERS ->
-                getLast().setVisualParameters(new VisualParameters());
-
-            case XMLTags.GROWING_TIPS ->
-                getLast().setGrowingTips(new GrowingTips());
-        }
+        instantiateSubclass(qName);
     }
 
     @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
-        switch (qName) {
-            case XMLTags.ID ->
-                getLast().setId(Integer.parseInt(elementValue));
-
-            case XMLTags.NAME ->
-                getLast().setName(elementValue);
-
-            case XMLTags.SOIL ->
-                getLast().setSoil(Soil.valueOf(elementValue));
-
-            case XMLTags.ORIGIN ->
-                getLast().setOrigin(elementValue);
-
-            case XMLTags.STEM_COLOR ->
-                getLast().getVisualParameters().setStemColor(elementValue);
-
-            case XMLTags.LEAVES_COLOR ->
-                getLast().getVisualParameters().setLeavesColor(elementValue);
-
-            case XMLTags.AVERAGE_SIZE ->
-                getLast().getVisualParameters().setAverageSize(Double.parseDouble(elementValue));
-
-            case XMLTags.TEMPERATURE ->
-                getLast().getGrowingTips().setTemperature(Integer.parseInt(elementValue));
-
-            case XMLTags.IS_LIGHT_LOVING ->
-                getLast().getGrowingTips().setLightLoving(Boolean.parseBoolean(elementValue));
-
-            case XMLTags.WATER_AMOUNT ->
-                getLast().getGrowingTips().setWaterAmount(Integer.parseInt(elementValue));
-
-            case XMLTags.MULTIPLYING ->
-                getLast().setMultiplying(Multiplying.valueOf(elementValue));
-        }
+        setField(qName, elementValue);
     }
 
     public void addDataByDOMElement(Element element) {
@@ -85,35 +43,76 @@ public class OrangeryHandler extends DefaultHandler {
             orangery = new ArrayList<>();
         }
 
-        Flower flower = new Flower();
+        orangery.add(new Flower());
 
-        flower.setId(Integer.parseInt(element.getElementsByTagName("id").item(0).getTextContent()));
-        flower.setName(element.getElementsByTagName("name").item(0).getTextContent());
-        flower.setSoil(Soil.valueOf(element.getElementsByTagName("soil").item(0).getTextContent()));
-        flower.setOrigin(element.getElementsByTagName("origin").item(0).getTextContent());
+        setField("id", element.getElementsByTagName("id").item(0).getTextContent());
+        setField("name", element.getElementsByTagName("name").item(0).getTextContent());
+        setField("soil", element.getElementsByTagName("soil").item(0).getTextContent());
+        setField("origin", element.getElementsByTagName("origin").item(0).getTextContent());
 
-        flower.setVisualParameters(new VisualParameters());
+        instantiateSubclass("visualParameters");
 
-        flower.getVisualParameters().setStemColor(
-                element.getElementsByTagName("stemColor").item(0).getTextContent());
-        flower.getVisualParameters().setLeavesColor(
-                element.getElementsByTagName("leavesColor").item(0).getTextContent());
-        flower.getVisualParameters().setAverageSize(
-                Double.parseDouble(element.getElementsByTagName("averageSize").item(0).getTextContent()));
+        setField("stemColor", element.getElementsByTagName("stemColor").item(0).getTextContent());
+        setField("leavesColor", element.getElementsByTagName("leavesColor").item(0).getTextContent());
+        setField("averageSize", element.getElementsByTagName("averageSize").item(0).getTextContent());
 
-        flower.setGrowingTips(new GrowingTips());
+        instantiateSubclass("growingTips");
 
-        flower.getGrowingTips().setTemperature(
-                Integer.parseInt(element.getElementsByTagName("temperature").item(0).getTextContent()));
-        flower.getGrowingTips().setLightLoving(
-                Boolean.parseBoolean(element.getElementsByTagName("isLightLoving").item(0).getTextContent()));
-        flower.getGrowingTips().setTemperature(
-                Integer.parseInt(element.getElementsByTagName("waterAmount").item(0).getTextContent()));
+        setField("temperature", element.getElementsByTagName("temperature").item(0).getTextContent());
+        setField("isLightLoving", element.getElementsByTagName("isLightLoving").item(0).getTextContent());
+        setField("waterAmount", element.getElementsByTagName("waterAmount").item(0).getTextContent());
 
-        flower.setMultiplying(Multiplying.valueOf(
-                element.getElementsByTagName("multiplying").item(0).getTextContent()));
+        setField("multiplying", element.getElementsByTagName("multiplying").item(0).getTextContent());
+    }
 
-        orangery.add(flower);
+    private void instantiateSubclass(String qName) {
+        switch (qName) {
+            case XMLTags.FLOWER ->
+                    orangery.add(new Flower());
+
+            case XMLTags.VISUAL_PARAMETERS ->
+                    getLast().setVisualParameters(new VisualParameters());
+
+            case XMLTags.GROWING_TIPS ->
+                    getLast().setGrowingTips(new GrowingTips());
+        }
+    }
+
+    public void setField(String qName, String value) {
+        switch (qName) {
+            case XMLTags.ID ->
+                    getLast().setId(Integer.parseInt(value));
+
+            case XMLTags.NAME ->
+                    getLast().setName(value);
+
+            case XMLTags.SOIL ->
+                    getLast().setSoil(Soil.valueOf(value));
+
+            case XMLTags.ORIGIN ->
+                    getLast().setOrigin(value);
+
+            case XMLTags.STEM_COLOR ->
+                    getLast().getVisualParameters().setStemColor(value);
+
+            case XMLTags.LEAVES_COLOR ->
+                    getLast().getVisualParameters().setLeavesColor(value);
+
+            case XMLTags.AVERAGE_SIZE ->
+                    getLast().getVisualParameters().setAverageSize(Double.parseDouble(value));
+
+            case XMLTags.TEMPERATURE ->
+                    getLast().getGrowingTips().setTemperature(Integer.parseInt(value));
+
+            case XMLTags.IS_LIGHT_LOVING ->
+                    getLast().getGrowingTips().setLightLoving(Boolean.parseBoolean(value));
+
+            case XMLTags.WATER_AMOUNT ->
+                    getLast().getGrowingTips().setWaterAmount(Integer.parseInt(value));
+
+            case XMLTags.MULTIPLYING ->
+                    getLast().setMultiplying(Multiplying.valueOf(value));
+        }
     }
     
     public List<Flower> getOrangery() {
