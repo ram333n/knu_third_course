@@ -1,13 +1,11 @@
 package org.example.classes;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @AllArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Flower {
     private int id;
     private String name;
