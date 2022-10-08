@@ -13,34 +13,39 @@ public class CharCounter implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("----------------------------------");
-
         if(areAmountsEqual()) {
             interruptAll();
         } else {
             clearFrequencies();
         }
+
+        System.out.println("----------------------------------");
     }
 
     private boolean areAmountsEqual() {
         int amountOfA = 0;
         int amountOfB = 0;
 
-        for(Map<Character, Integer> frequency : charFrequencies) {
-            if(frequency.containsKey('A')) {
-                amountOfA += frequency.get('A');
-            }
+        for(int i = 0; i < charFrequencies.length; i++) {
+            System.out.printf("%d) : %s%n", i + 1, charFrequencies[i]);
+            amountOfA += charFrequencies[i].getOrDefault('A', 0);
+            amountOfB += charFrequencies[i].getOrDefault('B', 0);
+        }
 
-            if(frequency.containsKey('B')) {
-                amountOfB += frequency.get('B');
-            }
+        if(amountOfA == amountOfB) {
+            System.out.printf("Four threads have the same count of A(%d) and B(%d). Terminate...%n", amountOfA, amountOfB);
+            return true;
         }
 
         for(int i = 0; i < charFrequencies.length; i++) {
             int currentMapAAmount = charFrequencies[i].getOrDefault('A', 0);
             int currentMapBAmount = charFrequencies[i].getOrDefault('B', 0);
 
-            if(amountOfA - currentMapAAmount == amountOfB - currentMapBAmount) {
+            int partialSumOfA = amountOfA - currentMapAAmount;
+            int partialSumOfB = amountOfB - currentMapBAmount;
+
+            if(partialSumOfA == partialSumOfB) {
+                System.out.printf("Three threads have the same count of A(%d) and B(%d). Terminate...%n", partialSumOfA, partialSumOfB);
                 return true;
             }
         }

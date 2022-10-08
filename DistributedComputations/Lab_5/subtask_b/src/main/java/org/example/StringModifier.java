@@ -29,7 +29,7 @@ public class StringModifier implements Runnable {
                 final char target = pair[1];
                 replaceChars(source, target);
                 Thread.sleep(UtilClass.DURATION);
-                System.out.printf("%s replaced chars(%s-%s), value : %s%n", name, source, target, str);
+                System.out.printf("%s replaced chars(%s->%s), result : %s%n", name, source, target, str);
                 barrier.await();
             } catch (InterruptedException | BrokenBarrierException e) {
                 throw new RuntimeException(e);
@@ -39,13 +39,20 @@ public class StringModifier implements Runnable {
 
     private void replaceChars(char source, char target) {
         for(int i = 0; i < str.length(); i++) {
-            if(str.charAt(i) == source) {
+            char currentChar = str.charAt(i);
+
+            if(currentChar == source) {
                 str.setCharAt(i, target);
+                currentChar = str.charAt(i);
             }
 
-            if(target == 'A' || target == 'B') {
-                frequency.merge(str.charAt(i), 1, Integer::sum);
+            if(currentChar == 'A' || currentChar == 'B') {
+                increaseFrequency(currentChar);
             }
         }
+    }
+
+    private void increaseFrequency(char c) {
+        frequency.merge(c, 1, Integer::sum);
     }
 }
