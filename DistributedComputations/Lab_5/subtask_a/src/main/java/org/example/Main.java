@@ -1,40 +1,31 @@
 package org.example;
 
+import java.util.Arrays;
+
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        CustomCyclicBarrier barrier = new CustomCyclicBarrier(3, () -> System.out.println("aboba"));
-        Thread t1 = new Thread(() -> {
+        Thread[] threads = new Thread[UtilClass.PARTS];
+        int[] recruits = UtilClass.generateRecruits();
+        CustomCyclicBarrier barrier = new CustomCyclicBarrier(UtilClass.PARTS);
+
+        RecruitsPart.fillFinishedArray(UtilClass.PARTS);
+
+        for(int i = 0; i < threads.length; i++){
+            threads[i] = new Thread(new RecruitsPart(recruits, barrier, i, i * 50, (i + 1) * 50));
+        }
+
+        for (Thread thread : threads) {
+            thread.start();
+        }
+
+        for (Thread thread : threads) {
             try {
-                barrier.await();
+                thread.join();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
-        });
+        }
 
-        Thread.sleep(200);
-
-        Thread t2 = new Thread(() -> {
-            try {
-                barrier.await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        Thread t3 = new Thread(() -> {
-            try {
-                barrier.await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-        t1.join();
-        t2.join();
-        t3.join();
+        System.out.printf("Result: %s%n", Arrays.toString(recruits));
     }
 }
