@@ -14,15 +14,16 @@ public class ProcessComputer {
     private Optional<Integer> result;
 
     public ProcessComputer(String host, int port, char functionName) throws IOException, InterruptedException {
-        this.functionName = functionName;
+        connectToManager(host, port);
 
+        this.functionName = functionName;
         connectToManager(host, port);
         int argument = parseArgument();
         compute(argument);
 
         int computationCode = 0;
 
-        if(result.isEmpty()) {
+        if (result.isEmpty()) {
             computationCode = -1;
         }
 
