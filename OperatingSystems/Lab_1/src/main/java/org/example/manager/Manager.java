@@ -18,18 +18,22 @@ public class Manager {
     private Process processF;
     private Process processG;
     private boolean toCancel;
+    private ComputationOutput resultF;
+    private ComputationOutput resultG;
 
     public Manager(int port, int argument) {
         this.port = port;
         this.argument = argument;
         this.toCancel = false;
+        this.resultF = null;
+        this.resultG = null;
     }
 
-    private static class ComputationResult {
+    private static class ComputationOutput {
         final int computationCode;
         final int result;
 
-        public ComputationResult(ByteBuffer buffer) {
+        public ComputationOutput(ByteBuffer buffer) {
             buffer.rewind();
             this.computationCode = buffer.getInt();
             this.result = buffer.getInt();
@@ -40,6 +44,9 @@ public class Manager {
         openServer();
 
         Signal.handle(new Signal("INT"), signal -> toCancel = true);
+
+        runProcess(Constants.PROCESS_F_PATH);
+        runProcess(Constants.PROCESS_G_PATH);
 
         Future<AsynchronousSocketChannel> channelFutureF = serverChannel.accept();
         Future<AsynchronousSocketChannel> channelFutureG = serverChannel.accept();
@@ -55,12 +62,15 @@ public class Manager {
         Future<Integer> responseFutureF = channelF.read(bufferF);
         Future<Integer> responseFutureG = channelG.read(bufferG);
 
-        while (!responseFutureF.isDone() || !responseFutureG.isDone()) {
-            if (toCancel) { //TODO : wrap Signal.handle into separate method
-                System.out.println("[INFO] Computation canceled");
-                break;
-            }
+        handleFunctionComputation(responseFutureF, bufferF, resultF, 'F');
+        handleFunctionComputation(responseFutureG, bufferG, resultG, 'G');
+
+        if (!toCancel) {
+            int result = Math.min(resultF.result, resultG.result);
+            System.out.printf("[INFO] Successfully computed. Value : %d%n", result);
         }
+
+        serverChannel.close();
     }
 
     private void openServer() throws IOException {
@@ -69,8 +79,8 @@ public class Manager {
         serverChannel.bind(address);
     }
 
-    private Process runProcess(String path) {
-        return null; //TODO : impl it
+    private Process runProcess(String path) throws IOException {
+        return Runtime.getRuntime().exec(String.format("java -cp %s %s", Constants.PATH_TO_JAR, path));
     }
 
     private void passArgument(AsynchronousSocketChannel channelF,
@@ -96,5 +106,40 @@ public class Manager {
         bufferG.clear();
     }
 
-    private
+    private void handleFunctionComputation(Future<Integer> future,
+                                           ByteBuffer buffer,
+                                           ComputationOutput computationOutput,
+                                           char functionName) {
+        boolean isPrinted = toCancel;
+
+        while (!isPrinted) {
+            if (toCancel) {
+                System.out.println("[INFO] Computation canceled. Terminate.");
+                break;
+            }
+
+            if (!future.isDone()) {
+                continue;
+            }
+
+            computationOutput = new ComputationOutput(buffer);
+
+            if(computationOutput.computationCode == 0) {
+                System.out.printf("[INFO] Function %s result is %d%n", functionName, computationOutput.result);
+                isPrinted = true;
+            } else {
+                System.out.printf("[HARD FAIL] Function %s failed on given input. Terminate.%n", functionName);
+                toCancel = true;
+            }
+        }
+
+        if(toCancel) {
+            destroyProcesses();
+        }
+    }
+
+    private void destroyProcesses() {
+        processF.destroy();
+        processG.destroy();
+    }
 }
