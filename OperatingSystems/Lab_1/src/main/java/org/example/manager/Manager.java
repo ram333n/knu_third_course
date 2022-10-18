@@ -1,6 +1,7 @@
 package org.example.manager;
 
 import org.example.Constants;
+import sun.misc.Signal;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -16,16 +17,30 @@ public class Manager {
     private final int argument;
     private Process processF;
     private Process processG;
+    private boolean toCancel;
 
     public Manager(int port, int argument) {
         this.port = port;
         this.argument = argument;
+        this.toCancel = false;
+    }
+
+    private static class ComputationResult {
+        final int computationCode;
+        final int result;
+
+        public ComputationResult(ByteBuffer buffer) {
+            buffer.rewind();
+            this.computationCode = buffer.getInt();
+            this.result = buffer.getInt();
+        }
     }
 
     public void compute() throws IOException, ExecutionException, InterruptedException {
         openServer();
-        //TODO: run processes
-        //
+
+        Signal.handle(new Signal("INT"), signal -> toCancel = true);
+
         Future<AsynchronousSocketChannel> channelFutureF = serverChannel.accept();
         Future<AsynchronousSocketChannel> channelFutureG = serverChannel.accept();
 
@@ -40,7 +55,18 @@ public class Manager {
         Future<Integer> responseFutureF = channelF.read(bufferF);
         Future<Integer> responseFutureG = channelG.read(bufferG);
 
-        //TODO: handle computations
+        while (!responseFutureF.isDone() || !responseFutureG.isDone()) {
+            if (toCancel) { //TODO : wrap Signal.handle into separate method
+                System.out.println("[INFO] Computation canceled");
+                break;
+            }
+        }
+    }
+
+    private void openServer() throws IOException {
+        serverChannel = AsynchronousServerSocketChannel.open();
+        InetSocketAddress address = new InetSocketAddress(Constants.HOST, port);
+        serverChannel.bind(address);
     }
 
     private Process runProcess(String path) {
@@ -70,9 +96,5 @@ public class Manager {
         bufferG.clear();
     }
 
-    private void openServer() throws IOException {
-        serverChannel = AsynchronousServerSocketChannel.open();
-        InetSocketAddress address = new InetSocketAddress(Constants.HOST, port);
-        serverChannel.bind(address);
-    }
+    private
 }
