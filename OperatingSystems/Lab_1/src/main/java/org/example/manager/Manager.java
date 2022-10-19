@@ -10,6 +10,7 @@ import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public class Manager {
     private AsynchronousServerSocketChannel serverChannel;
@@ -41,20 +42,23 @@ public class Manager {
     }
 
     public void compute() throws IOException, ExecutionException, InterruptedException {
+        Signal.handle(new Signal("INT"), signal -> {
+            System.out.println("[INFO]\tComputation cancelled. Terminate.");
+            destroyProcesses();
+            System.exit(0);
+        });
+
         openServer();
+        System.out.println("[INFO]\tOpened server");
+        AsynchronousSocketChannel channelF = runProcess(processF, Constants.PROCESS_F_PATH);
+        System.out.println("[INFO]\tF connected");
+        AsynchronousSocketChannel channelG = runProcess(processG, Constants.PROCESS_G_PATH);
+        System.out.println("[INFO]\tG connected");
 
-        Signal.handle(new Signal("INT"), signal -> toCancel = true);
-
-        runProcess(Constants.PROCESS_F_PATH);
-        runProcess(Constants.PROCESS_G_PATH);
-
-        Future<AsynchronousSocketChannel> channelFutureF = serverChannel.accept();
-        Future<AsynchronousSocketChannel> channelFutureG = serverChannel.accept();
-
-        AsynchronousSocketChannel channelF = channelFutureF.get();
-        AsynchronousSocketChannel channelG = channelFutureG.get();
-
-        passArgument(channelF, channelG);
+        passArgument(channelF);
+        System.out.println("[INFO]\tPassed arguments to F");
+        passArgument(channelG);
+        System.out.println("[INFO]\tPassed arguments to G");
 
         ByteBuffer bufferF = ByteBuffer.allocate(2 * Integer.BYTES);
         ByteBuffer bufferG = ByteBuffer.allocate(2 * Integer.BYTES);
@@ -62,12 +66,12 @@ public class Manager {
         Future<Integer> responseFutureF = channelF.read(bufferF);
         Future<Integer> responseFutureG = channelG.read(bufferG);
 
-        handleFunctionComputation(responseFutureF, bufferF, resultF, 'F');
-        handleFunctionComputation(responseFutureG, bufferG, resultG, 'G');
+        handleFunctionComputation(responseFutureF, bufferF, result -> resultF = result, 'F');
+        handleFunctionComputation(responseFutureG, bufferG, result -> resultG = result, 'G');
 
         if (!toCancel) {
             int result = Math.min(resultF.result, resultG.result);
-            System.out.printf("[INFO] Successfully computed. Value : %d%n", result);
+            System.out.printf("[INFO]\tSuccessfully computed. Result : %d%n", result);
         }
 
         serverChannel.close();
@@ -79,53 +83,42 @@ public class Manager {
         serverChannel.bind(address);
     }
 
-    private Process runProcess(String path) throws IOException {
-        return Runtime.getRuntime().exec(String.format("java -cp %s %s", Constants.PATH_TO_JAR, path));
+    private AsynchronousSocketChannel runProcess(Process process, String path)
+            throws IOException, ExecutionException, InterruptedException {
+        Future<AsynchronousSocketChannel> channelFuture = serverChannel.accept();
+        process = Runtime.getRuntime().
+                exec(String.format("java -cp %s %s", Constants.PATH_TO_JAR, path));
+
+        return channelFuture.get();
     }
 
-    private void passArgument(AsynchronousSocketChannel channelF,
-                              AsynchronousSocketChannel channelG)
+    private void passArgument(AsynchronousSocketChannel channel)
             throws ExecutionException, InterruptedException {
 
-        ByteBuffer bufferF = ByteBuffer.allocate(Integer.BYTES);
-        ByteBuffer bufferG = ByteBuffer.allocate(Integer.BYTES);
-
-        bufferF.putInt(argument);
-        bufferG.putInt(argument);
-
-        bufferF.flip();
-        bufferG.flip();
-
-        Future<Integer> writeFutureF = channelF.write(bufferF);
-        Future<Integer> writeFutureG = channelG.write(bufferG);
-
-        writeFutureF.get();
-        writeFutureG.get();
-
-        bufferF.clear();
-        bufferG.clear();
+        ByteBuffer buffer = ByteBuffer.allocate(Integer.BYTES);
+        buffer.putInt(argument);
+        buffer.flip();
+        Future<Integer> writeFuture = channel.write(buffer);
+        writeFuture.get();
+        buffer.clear();
     }
 
     private void handleFunctionComputation(Future<Integer> future,
                                            ByteBuffer buffer,
-                                           ComputationOutput computationOutput,
+                                           Consumer<ComputationOutput> resultSetter,
                                            char functionName) {
         boolean isPrinted = toCancel;
 
-        while (!isPrinted) {
-            if (toCancel) {
-                System.out.println("[INFO] Computation canceled. Terminate.");
-                break;
-            }
-
+        while (!isPrinted && !toCancel) {
             if (!future.isDone()) {
                 continue;
             }
 
-            computationOutput = new ComputationOutput(buffer);
+            ComputationOutput computationOutput = new ComputationOutput(buffer);
+            resultSetter.accept(computationOutput);
 
             if(computationOutput.computationCode == 0) {
-                System.out.printf("[INFO] Function %s result is %d%n", functionName, computationOutput.result);
+                System.out.printf("[INFO]\tFunction %s result is %d%n", functionName, computationOutput.result);
                 isPrinted = true;
             } else {
                 System.out.printf("[HARD FAIL] Function %s failed on given input. Terminate.%n", functionName);
@@ -139,7 +132,12 @@ public class Manager {
     }
 
     private void destroyProcesses() {
-        processF.destroy();
-        processG.destroy();
+        if (processF != null) {
+            processF.destroy();
+        }
+
+        if(processG != null) {
+            processG.destroy();
+        }
     }
 }
