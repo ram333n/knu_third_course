@@ -32,7 +32,6 @@ public class ProcessComputer {
     private void connectToManager(String host, int port) throws IOException {
         socketChannel = SocketChannel.open();
         InetSocketAddress address = new InetSocketAddress(host, port);
-        System.out.println("abPort : " + address.getPort());
         socketChannel.connect(address);
     }
 

@@ -45,15 +45,22 @@ public class Manager {
         Signal.handle(new Signal("INT"), signal -> {
             System.out.println("[INFO]\tComputation cancelled. Terminate.");
             destroyProcesses();
+
+            try {
+                serverChannel.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
             System.exit(0);
         });
 
         openServer();
         System.out.println("[INFO]\tOpened server");
 
-        AsynchronousSocketChannel channelF = runProcess(processF, Constants.PROCESS_F_PATH);
+        AsynchronousSocketChannel channelF = runProcess((process -> processF = process), Constants.PROCESS_F_PATH);
         System.out.println("[INFO]\tF connected");
-        AsynchronousSocketChannel channelG = runProcess(processG, Constants.PROCESS_G_PATH);
+        AsynchronousSocketChannel channelG = runProcess((process -> processG = process), Constants.PROCESS_G_PATH);
         System.out.println("[INFO]\tG connected");
 
         passArgument(channelF, channelG);
@@ -65,12 +72,40 @@ public class Manager {
         Future<Integer> responseFutureF = channelF.read(bufferF);
         Future<Integer> responseFutureG = channelG.read(bufferG);
 
-        handleFunctionComputation(responseFutureF, bufferF, result -> resultF = result, 'F');
-        handleFunctionComputation(responseFutureG, bufferG, result -> resultG = result, 'G');
+        boolean isPrintedF = false;
+        boolean isPrintedG = false;
+
+        while ((!isPrintedF || !isPrintedG) && !toCancel) {
+            if (responseFutureF.isDone() && !isPrintedF) {
+                resultF = new ComputationOutput(bufferF);
+
+                if(resultF.computationCode == 0) {
+                    System.out.printf("[INFO]\tFunction F result is %d%n", resultF.result);
+                    isPrintedF = true;
+                } else {
+                    System.out.println("[HARD FAIL] Function F failed on given input. Terminate.");
+                    toCancel = true;
+                }
+            }
+
+            if (responseFutureG.isDone() && !isPrintedG) {
+                resultG = new ComputationOutput(bufferG);
+
+                if(resultG.computationCode == 0) {
+                    System.out.printf("[INFO]\tFunction G result is %d%n", resultG.result);
+                    isPrintedG = true;
+                } else {
+                    System.out.println("[HARD FAIL] Function G failed on given input. Terminate.");
+                    toCancel = true;
+                }
+            }
+        }
 
         if (!toCancel) {
             int result = Math.min(resultF.result, resultG.result);
             System.out.printf("[INFO]\tSuccessfully computed. Result : %d%n", result);
+        } else {
+            destroyProcesses();
         }
 
         serverChannel.close();
@@ -82,11 +117,12 @@ public class Manager {
         serverChannel.bind(address);
     }
 
-    private AsynchronousSocketChannel runProcess(Process process, String path)
+    private AsynchronousSocketChannel runProcess(Consumer<Process> setter, String path)
             throws IOException, ExecutionException, InterruptedException {
-        process = Runtime.getRuntime().
+        Process process = Runtime.getRuntime().
                 exec(String.format("java -cp %s %s", Constants.PATH_TO_JAR, path));
 
+        setter.accept(process);
         Future<AsynchronousSocketChannel> channelFuture = serverChannel.accept();
 
         return channelFuture.get();
@@ -115,40 +151,12 @@ public class Manager {
         bufferG.clear();
     }
 
-    private void handleFunctionComputation(Future<Integer> future,
-                                           ByteBuffer buffer,
-                                           Consumer<ComputationOutput> resultSetter,
-                                           char functionName) {
-        boolean isPrinted = toCancel;
-
-        while (!isPrinted && !toCancel) {
-            if (!future.isDone()) {
-                continue;
-            }
-
-            ComputationOutput computationOutput = new ComputationOutput(buffer);
-            resultSetter.accept(computationOutput);
-
-            if(computationOutput.computationCode == 0) {
-                System.out.printf("[INFO]\tFunction %s result is %d%n", functionName, computationOutput.result);
-                isPrinted = true;
-            } else {
-                System.out.printf("[HARD FAIL] Function %s failed on given input. Terminate.%n", functionName);
-                toCancel = true;
-            }
-        }
-
-        if(toCancel) {
-            destroyProcesses();
-        }
-    }
-
     private void destroyProcesses() {
         if (processF != null) {
             processF.destroy();
         }
 
-        if(processG != null) {
+        if (processG != null) {
             processG.destroy();
         }
     }
