@@ -15,6 +15,11 @@ public class Manager {
         this.players = new ArrayList<>();
     }
 
+    public Manager(List<Team> teams, List<Player> players) {
+        this.teams = teams;
+        this.players = players;
+    }
+
     public void loadFromFile(String pathToXml) {}
 
     public void saveToFile(String pathToXml) {}
