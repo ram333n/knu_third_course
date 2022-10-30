@@ -20,10 +20,6 @@ public class Manager {
         this.players = players;
     }
 
-    public void loadFromFile(String pathToXml) {}
-
-    public void saveToFile(String pathToXml) {}
-
     public void addTeam(String name, String country) {
         UUID id = UUID.randomUUID();
         Team toAdd = new Team(id, name, country);
@@ -53,6 +49,7 @@ public class Manager {
             return;
         }
 
+        teams.remove(team.get());
         long playersToDelete = getPlayerCountInTeam(teamId);
         deletePlayersOfTeam(teamId);
         System.out.printf("Deleted %d players of team: %s%n", playersToDelete, teamId);
@@ -97,11 +94,33 @@ public class Manager {
         System.out.printf("Successfully updated player: %s%n", playerId);
     }
 
-    public void getTeamById(UUID teamId) {}
+    public void getTeamById(UUID teamId) {
+        Optional<Team> team = findTeamById(teamId);
 
-    public void getPlayerById(UUID playerId) {}
+        if (team.isEmpty()) {
+            System.out.printf("Unable to find team with id: %s(no occurrence found)%n", teamId);
+            return;
+        }
 
-    public void getAllTeams() {
+        System.out.printf("Found team with id: %s%n%s%n", teamId, team.get());
+    }
+
+    public void getPlayerById(UUID playerId) {
+        Optional<Player> player = findPlayerById(playerId);
+
+        if (player.isEmpty()) {
+            System.out.printf("Unable to find player with id: %s(no occurrence found)%n", playerId);
+            return;
+        }
+
+        System.out.printf("Found player with id: %s%n%s%n", playerId, player.get());
+    }
+
+    public List<Team> getListOfTeams() {
+        return new ArrayList<>(teams);
+    }
+
+    public void printAllTeams() {
         System.out.println("Teams:");
 
         for (Team team : teams) {
@@ -110,20 +129,26 @@ public class Manager {
         }
     }
 
-    public void getAllPlayersOfTeam(UUID teamId) {
+    public List<Player> getListOfPlayersOfTeam(UUID teamId) {
+        return players.stream()
+                .filter(player -> Objects.equals(player.getTeamId(), teamId))
+                .toList();
+    }
+
+    public void printAllPlayersOfTeam(UUID teamId) {
         Optional<Team> team = findTeamById(teamId);
 
         if (team.isEmpty()) {
             System.out.printf("Unable to get all players of team: %s(no occurrence of team found)%n", teamId);
         }
 
+        List<Player> playersOfTeam = getListOfPlayersOfTeam(teamId);
         System.out.printf("Players of team %s:%n", teamId);
-        players.stream()
-                .filter(player -> Objects.equals(player.getTeamId(), teamId))
-                .forEach((player -> {
-                    System.out.println(player);
-                    System.out.println("--------------------------");
-                }));
+
+        for (Player player : playersOfTeam) {
+            System.out.println(player);
+            System.out.println("--------------------------");
+        }
     }
 
     public long getPlayerCountInTeam(UUID teamId) {

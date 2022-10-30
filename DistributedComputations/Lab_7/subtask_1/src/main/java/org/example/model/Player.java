@@ -53,4 +53,14 @@ public class Player {
     public void setPrice(BigDecimal price) {
         this.price = price;
     }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "id=" + id +
+                ", teamId=" + teamId +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                '}';
+    }
 }
