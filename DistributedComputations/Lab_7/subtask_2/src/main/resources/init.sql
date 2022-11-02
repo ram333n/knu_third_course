@@ -17,5 +17,8 @@ INSERT INTO football.players(team_id, name, price) VALUES (3, 'Cortois', 5000000
 INSERT INTO football.players(team_id, name, price) VALUES (4, 'Messi', 1000000);
 INSERT INTO football.players(team_id, name, price) VALUES (4, 'Mbappe', 2000000);
 
+# INSERT INTO football.players VALUES (0, 4, 'Mbappe', 2000000);
 
-
+# SET FOREIGN_KEY_CHECKS = 0;
+# TRUNCATE TABLE football.teams;
+# SET FOREIGN_KEY_CHECKS = 1;
