@@ -66,7 +66,6 @@ class Lab2Test {
     private static void testParsing(Parser parser) {
         List<Flower> orangery = parser.parse(PATH_TO_XML);
         orangery.sort(COMPARATOR);
-        orangery.equals(EXPECTED_SORTED_ORANGERY);
         assertEquals(EXPECTED_SORTED_ORANGERY, orangery);
     }
 
