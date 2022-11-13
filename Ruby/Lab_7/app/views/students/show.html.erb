@@ -1,0 +1,13 @@
+<h1><%= @student.surname %></h1>
+
+<p>Group: <%= @student.group %></p>
+<p>Geometry score: <%= @student.geometry_score %></p>
+<p>Algebra score: <%= @student.algebra_score %></p>
+<p>Informatics score: <%= @student.informatics_score %></p>
+
+<ul>
+  <li><%= link_to "Edit", edit_student_path(@student) %></li>
+  <li><%= button_to "Destroy", student_path(@student), method: :delete%></li>
+</ul>
+
+<%= link_to "Back to list", students_path %>

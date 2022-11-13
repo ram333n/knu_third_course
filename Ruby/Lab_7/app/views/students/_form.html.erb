@@ -1,0 +1,45 @@
+<%= form_with model: student do |form| %>
+  <div>
+    <%= form.label :surname%><br>
+    <%= form.text_field :surname %>
+    <% student.errors.full_messages_for(:surname).each do |message| %>
+      <div><%= message %></div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :group%><br>
+    <%= form.text_field :group %>
+    <% student.errors.full_messages_for(:group).each do |message| %>
+      <div><%= message %></div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :geometry_score%><br>
+    <%= form.number_field :geometry_score %>
+    <% student.errors.full_messages_for(:geometry_score).each do |message| %>
+      <div><%= message %></div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :algebra_score%><br>
+    <%= form.number_field :algebra_score %>
+    <% student.errors.full_messages_for(:algebra_score).each do |message| %>
+      <div><%= message %></div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :informatics_score%><br>
+    <%= form.number_field :informatics_score %>
+    <% student.errors.full_messages_for(:informatics_score).each do |message| %>
+      <div><%= message %></div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
