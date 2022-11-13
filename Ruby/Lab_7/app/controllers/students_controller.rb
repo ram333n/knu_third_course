@@ -75,11 +75,7 @@ class StudentsController < ApplicationController
       subj_array.push(k)
     end
 
-    if !subj_array.empty?
-      @successful_subjects = subj_array.join(", ")
-    else
-      @successful_subjects = "There isn't any student in db"
-    end
+    @successful_subjects = !subj_array.empty? ? subj_array.join(", ") : "There isn't any student in db"
   end
 
 private
