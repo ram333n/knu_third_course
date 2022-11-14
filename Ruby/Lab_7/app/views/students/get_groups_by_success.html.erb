@@ -1,0 +1,15 @@
+<h1>Groups by success</h1>
+
+<%if @groups_by_success.empty? %>
+  <h4>There isn't any group in db</h4>
+<% else %>
+  <ul>
+    <%@groups_by_success.each do |k, v| %>
+      <li>
+        <%= "#{k}: #{v}%" %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<%= link_to "Back to list", students_path %>

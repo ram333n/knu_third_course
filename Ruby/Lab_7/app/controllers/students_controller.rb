@@ -46,6 +46,28 @@ class StudentsController < ApplicationController
     @students = Student.where("geometry_score < 3 OR algebra_score < 3 OR informatics_score < 3")
   end
 
+  def get_groups_by_success
+    @groups = Student.distinct.pluck(:group)
+    @groups_by_success = Hash.new
+    # if @groups.empty
+    #   return
+    # end
+
+    @groups.each do |group|
+      students_count = Student.group(:group).count[group]
+      successful_students = Student.select { |student|
+        student.group == group &&
+        student.geometry_score > 3 &&
+        student.algebra_score > 3 &&
+        student.informatics_score > 3
+      }.count
+
+      @groups_by_success[group] = successful_students * 100 / students_count
+    end
+
+    @groups_by_success = @groups_by_success.sort_by { |k, v| v}.reverse
+  end
+
   def get_successful_percentage
     @total_count = Student.count
 
@@ -62,9 +84,9 @@ class StudentsController < ApplicationController
     @scores_sum["Geometry"] = Student.sum(:geometry_score)
     @scores_sum["Algebra"] = Student.sum(:algebra_score)
     @scores_sum["Informatics"] = Student.sum(:informatics_score)
-    @scores_sum.sort_by { |k, v| v}.reverse!
+    @scores_sum = @scores_sum.sort_by { |k, v| v}.reverse
 
-    max_score_sum = @scores_sum.values[0]
+    max_score_sum = @scores_sum[0][1]
     subj_array = []
 
     @scores_sum.each do |k, v|
