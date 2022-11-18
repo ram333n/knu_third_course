@@ -1,5 +1,6 @@
 package org.example.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Data;

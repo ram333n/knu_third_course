@@ -44,17 +44,10 @@ public class PlayerDao {
         try (Connection connection = SingletonConnector.getConnection();
              Statement statement = connection.createStatement()) {
 
-            List<Player> result = new ArrayList<>();
+            List<Player> result;
 
             try (ResultSet rs = statement.executeQuery(sql)) {
-                while (rs.next()) {
-                    Player player = new Player();
-                    player.setId(rs.getLong("id"));
-                    player.setTeamId(rs.getLong("team_id"));
-                    player.setName(rs.getString("name"));
-                    player.setPrice(rs.getBigDecimal("price"));
-                    result.add(player);
-                }
+                result = getPlayersFromResultSet(rs);
             }
 
             return result;
@@ -97,7 +90,7 @@ public class PlayerDao {
     }
 
     public boolean insert(Player toInsert) {
-        final String sql = "INSERT INTO football.players(team_id, name, price) VALUES(?, ?, ?)";
+        final String sql = "INSERT INTO players(team_id, name, price) VALUES(?, ?, ?)";
 
         try (Connection connection = SingletonConnector.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -111,5 +104,57 @@ public class PlayerDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<Player> findByTeamName(String teamName) {
+        final String sql = """
+            SELECT * FROM players WHERE team_id = (
+                SELECT id FROM teams WHERE teams.name = ?
+            )
+        """;
+
+        try (Connection connection = SingletonConnector.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, teamName);
+            List<Player> result;
+
+            try (ResultSet rs = statement.executeQuery()) {
+                result = getPlayersFromResultSet(rs);
+            }
+
+            return result;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean moveToAnotherTeam(Long playerId, Long newTeamId) {
+        Optional<Player> playerOptional = findById(playerId);
+
+        if (playerOptional.isEmpty()) {
+            return false;
+        }
+
+        Player player = playerOptional.get();
+        player.setTeamId(newTeamId);
+        update(player);
+
+        return true;
+    }
+
+    private List<Player> getPlayersFromResultSet(ResultSet rs) throws SQLException {
+        List<Player> result = new ArrayList<>();
+
+        while (rs.next()) {
+            Player player = new Player();
+            player.setId(rs.getLong("id"));
+            player.setTeamId(rs.getLong("team_id"));
+            player.setName(rs.getString("name"));
+            player.setPrice(rs.getBigDecimal("price"));
+            result.add(player);
+        }
+
+        return result;
     }
 }
