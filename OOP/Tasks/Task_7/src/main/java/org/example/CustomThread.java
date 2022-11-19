@@ -17,6 +17,7 @@ public class CustomThread extends Thread {
             Thread.sleep(duration);
             System.out.printf("Thread %d waited for %d ms %n", number, duration);
             barrier.await();
+            System.out.println("Some thread action after barrier");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
