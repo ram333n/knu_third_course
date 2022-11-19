@@ -8,6 +8,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Client {
@@ -26,7 +27,6 @@ public class Client {
         socket = new Socket(host, port);
         in = new DataInputStream(socket.getInputStream());
         out = new DataOutputStream(socket.getOutputStream());
-        System.out.println(new String(in.readAllBytes()));
     }
 
     public void disconnect() throws IOException {
@@ -76,10 +76,38 @@ public class Client {
         return in.readBoolean();
     }
 
-    //TODO: impl  List of team, players
-
     public List<Player> findPlayersByTeamName(String teamName) throws IOException {
-        return null;
+        IoUtils.writeString(out, "findPlayersByTeamName");
+        IoUtils.writeString(out, teamName);
+
+        return readPlayers();
     }
 
+    public List<Team> findAllTeams() throws IOException {
+        IoUtils.writeString(out, "findAllTeams");
+
+        return readTeams();
+    }
+
+    private List<Player> readPlayers() throws IOException {
+        List<Player> result = new ArrayList<>();
+        int listSize = in.readInt();
+
+        for (int i = 0; i < listSize; i++) {
+            result.add(IoUtils.readPlayer(in, true));
+        }
+
+        return result;
+    }
+
+    private List<Team> readTeams() throws IOException {
+        List<Team> result = new ArrayList<>();
+        int listSize = in.readInt();
+
+        for (int i = 0; i < listSize; i++) {
+            result.add(IoUtils.readTeam(in, true));
+        }
+
+        return result;
+    }
 }

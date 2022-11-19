@@ -24,9 +24,13 @@ public final class IoUtils {
         return new String(data);
     }
 
-    public static Player readPlayer(DataInputStream in) throws IOException {
+    public static Player readPlayer(DataInputStream in, boolean withId) throws IOException {
         Player player = new Player();
-        player.setId(in.readLong());
+
+        if (withId) {
+            player.setId(in.readLong());
+        }
+
         player.setTeamId(in.readLong());
         player.setName(readString(in));
         player.setPrice(new BigDecimal(readString(in)));
@@ -34,9 +38,13 @@ public final class IoUtils {
         return player;
     }
 
-    public static Team readTeam(DataInputStream in) throws IOException {
+    public static Team readTeam(DataInputStream in, boolean withId) throws IOException {
         Team team = new Team();
-        team.setId(in.readLong());
+
+        if (withId) {
+            team.setId(in.readLong());
+        }
+
         team.setName(readString(in));
         team.setCountry(readString(in));
 
