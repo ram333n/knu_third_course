@@ -1,45 +1,62 @@
-<%= form_with model: student do |form| %>
-  <div>
-    <%= form.label :surname%><br>
-    <%= form.text_field :surname %>
-    <% student.errors.full_messages_for(:surname).each do |message| %>
-      <div><%= message %></div>
-    <% end %>
+<%= form_for @student, :html => { :class => "form-horizontal student" } do |f| %>
+
+  <% if @student.errors.any? %>
+    <div id="error_expl" class="panel panel-danger">
+      <div class="panel-heading">
+        <h3 class="panel-title"><%= pluralize(@student.errors.count, "error") %> prohibited this student from being saved:</h3>
+      </div>
+      <div class="panel-body">
+        <ul>
+        <% @student.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :surname, :class => 'control-label col-lg-2' %>
+    <div class="col-lg-10">
+      <%= f.text_field :surname, :class => 'form-control' %>
+    </div>
+    <%=f.error_span(:surname) %>
+  </div>
+  <div class="form-group">
+    <%= f.label :group, :class => 'control-label col-lg-2' %>
+    <div class="col-lg-10">
+      <%= f.text_field :group, :class => 'form-control' %>
+    </div>
+    <%=f.error_span(:group) %>
+  </div>
+  <div class="form-group">
+    <%= f.label :geometry_score, :class => 'control-label col-lg-2' %>
+    <div class="col-lg-10">
+      <%= f.text_field :geometry_score, :class => 'form-control' %>
+    </div>
+    <%=f.error_span(:geometry_score) %>
+  </div>
+  <div class="form-group">
+    <%= f.label :algebra_score, :class => 'control-label col-lg-2' %>
+    <div class="col-lg-10">
+      <%= f.text_field :algebra_score, :class => 'form-control' %>
+    </div>
+    <%=f.error_span(:algebra_score) %>
+  </div>
+  <div class="form-group">
+    <%= f.label :informatics_score, :class => 'control-label col-lg-2' %>
+    <div class="col-lg-10">
+      <%= f.text_field :informatics_score, :class => 'form-control' %>
+    </div>
+    <%=f.error_span(:informatics_score) %>
   </div>
 
-  <div>
-    <%= form.label :group%><br>
-    <%= form.text_field :group %>
-    <% student.errors.full_messages_for(:group).each do |message| %>
-      <div><%= message %></div>
-    <% end %>
+  <div class="form-group">
+    <div class="col-lg-offset-2 col-lg-10">
+      <%= f.submit nil, :class => 'btn btn-primary' %>
+      <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
+                students_path, :class => 'btn btn-default' %>
+    </div>
   </div>
 
-  <div>
-    <%= form.label :geometry_score%><br>
-    <%= form.number_field :geometry_score %>
-    <% student.errors.full_messages_for(:geometry_score).each do |message| %>
-      <div><%= message %></div>
-    <% end %>
-  </div>
-
-  <div>
-    <%= form.label :algebra_score%><br>
-    <%= form.number_field :algebra_score %>
-    <% student.errors.full_messages_for(:algebra_score).each do |message| %>
-      <div><%= message %></div>
-    <% end %>
-  </div>
-
-  <div>
-    <%= form.label :informatics_score%><br>
-    <%= form.number_field :informatics_score %>
-    <% student.errors.full_messages_for(:informatics_score).each do |message| %>
-      <div><%= message %></div>
-    <% end %>
-  </div>
-
-  <div>
-    <%= form.submit %>
-  </div>
 <% end %>

@@ -1,15 +1,44 @@
-<h1>Students</h1>
+<%- model_class = Student -%>
+<div class="page-header" style="margin-left: 50px">
+  <h1><%=t '.title', :default => model_class.model_name.human.pluralize.titleize %></h1>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th><%= model_class.human_attribute_name(:id) %></th>
+      <th><%= model_class.human_attribute_name(:surname) %></th>
+      <th><%= model_class.human_attribute_name(:group) %></th>
+      <th><%= model_class.human_attribute_name(:geometry_score) %></th>
+      <th><%= model_class.human_attribute_name(:algebra_score) %></th>
+      <th><%= model_class.human_attribute_name(:informatics_score) %></th>
+      <th><%=t '.actions', :default => t("helpers.actions") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @students.each do |student| %>
+      <tr>
+        <td><%= link_to student.id, student_path(student) %></td>
+        <td><%= student.surname %></td>
+        <td><%= student.group %></td>
+        <td><%= student.geometry_score %></td>
+        <td><%= student.algebra_score %></td>
+        <td><%= student.informatics_score %></td>
+        <td>
+          <%= link_to t('.show', :default => t("helpers.links.show")),
+                      student_path(student), :class => 'btn btn-default btn-xs' %>
+          <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                      edit_student_path(student), :class => 'btn btn-default btn-xs' %>
+          <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                      student_path(student),
+                      :method => 'delete',
+                      :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
+                      :class => 'btn btn-xs btn-danger' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
 
-<ul>
-  <%@students.each do |student| %>
-    <li>
-      <%= link_to student.surname, student %>
-    </li>
-  <% end %>
-</ul>
-
-<%= link_to "New Student", new_student_path %> <br>
-<%= link_to "Student with academic debt", "/students/academic-debt" %> <br>
-<%= link_to "Groups by success", "/students/groups-by-success" %> <br>
-<%= link_to "Successful percentage", "/students/successful-percentage" %><br>
-<%= link_to "Successful subjects", "/students/successful-subjects" %>
+<%= link_to t('.new', :default => t("helpers.links.new")),
+            new_student_path,
+            :class => 'btn btn-primary' %>

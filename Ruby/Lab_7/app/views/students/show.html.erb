@@ -1,13 +1,27 @@
-<h1><%= @student.surname %></h1>
+<%- model_class = Student -%>
+<div class="page-header">
+  <h1><%=t '.title', :default => model_class.model_name.human.titleize %></h1>
+</div>
 
-<p>Group: <%= @student.group %></p>
-<p>Geometry score: <%= @student.geometry_score %></p>
-<p>Algebra score: <%= @student.algebra_score %></p>
-<p>Informatics score: <%= @student.informatics_score %></p>
+<dl class="dl-horizontal">
+  <dt><strong><%= model_class.human_attribute_name(:surname) %>:</strong></dt>
+  <dd><%= @student.surname %></dd>
+  <dt><strong><%= model_class.human_attribute_name(:group) %>:</strong></dt>
+  <dd><%= @student.group %></dd>
+  <dt><strong><%= model_class.human_attribute_name(:geometry_score) %>:</strong></dt>
+  <dd><%= @student.geometry_score %></dd>
+  <dt><strong><%= model_class.human_attribute_name(:algebra_score) %>:</strong></dt>
+  <dd><%= @student.algebra_score %></dd>
+  <dt><strong><%= model_class.human_attribute_name(:informatics_score) %>:</strong></dt>
+  <dd><%= @student.informatics_score %></dd>
+</dl>
 
-<ul>
-  <li><%= link_to "Edit", edit_student_path(@student) %></li>
-  <li><%= button_to "Destroy", student_path(@student), method: :delete%></li>
-</ul>
-
-<%= link_to "Back to list", students_path %>
+<%= link_to t('.back', :default => t("helpers.links.back")),
+              students_path, :class => 'btn btn-default'  %>
+<%= link_to t('.edit', :default => t("helpers.links.edit")),
+              edit_student_path(@student), :class => 'btn btn-default' %>
+<%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+              student_path(@student),
+              :method => 'delete',
+              :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
+              :class => 'btn btn-danger' %>
