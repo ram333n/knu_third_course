@@ -12,10 +12,9 @@ public class Main {
         try (Client client = new Client(Constants.HOST, Constants.PORT)) {
             client.connect();
             System.out.println(client.insertTeam(new Team(null, "Juventus", "Italy")));
-//            System.out.println(client.insertPlayer(new Player(null, 1L, "Tsygankov", BigDecimal.ZERO)));
-//            System.out.println("aboba");
-//            System.out.println(client.deletePlayer(1L));
-//            System.out.println(client.findPlayersByTeamName("Real Madrid"));
+            System.out.println(client.insertPlayer(new Player(null, 2L, "Tsygankov", BigDecimal.ZERO)));
+            System.out.println(client.deletePlayer(2L));
+            System.out.println(client.findPlayersByTeamName("Real Madrid"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

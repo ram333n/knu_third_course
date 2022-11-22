@@ -47,41 +47,42 @@ public class Server {
                     .correlationId(delivery.getProperties().getCorrelationId())
                     .build();
 
-            ByteArrayInputStream byteInputArray = new ByteArrayInputStream(delivery.getBody());
-            ByteArrayOutputStream response = new ByteArrayOutputStream();
-            DataInputStream in = new DataInputStream(byteInputArray);
+            DataInputStream in = new DataInputStream(new ByteArrayInputStream(delivery.getBody()));
+            ByteArrayOutputStream outBytes = new ByteArrayOutputStream();
+            DataOutputStream out = new DataOutputStream(outBytes);
 
             try {
                 String query = IoUtils.readString(in);
+                System.out.println(query);
                 switch (query) {
                     case "insertTeam" -> {
                         Team toInsert = IoUtils.readTeam(in, false);
-                        int result = teamDao.insert(toInsert) ? 1 : 0;
-                        //response.write(result);
+                        boolean result = teamDao.insert(toInsert);
+                        out.writeBoolean(result);
                     }
 
                     case "insertPlayer" -> {
                         Player toInsert = IoUtils.readPlayer(in, false);
-                        int result = playerDao.insert(toInsert) ? 1 : 0;
-                        response.write(result);
+                        boolean result = playerDao.insert(toInsert);
+                        out.writeBoolean(result);
                     }
 
                     case "deletePlayer" -> {
-                        Player toDelete = IoUtils.readPlayer(in, true);
-                        int result = playerDao.deleteById(toDelete.getId()) ? 1 : 0;
-                        response.write(result);
+                        Long toDelete = in.readLong();
+                        boolean result = playerDao.deleteById(toDelete);
+                        out.writeBoolean(result);
                     }
 
                     case "findPlayersByTeamName" -> {
                         String teamName = IoUtils.readString(in);
                         List<Player> result = playerDao.findByTeamName(teamName);
-                        writeListOfPlayers(response, result);
+                        writeListOfPlayers(out, result);
                     }
                 }
             } catch (RuntimeException e) {
                 System.out.println("[.]" + e);
             } finally {
-                channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, response.toByteArray());
+                channel.basicPublish("", delivery.getProperties().getReplyTo(), replyProps, outBytes.toByteArray());
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }
         };
@@ -89,8 +90,8 @@ public class Server {
         channel.basicConsume(Constants.QUEUE, false, deliverCallback, consumerTag -> {});
     }
 
-    private void writeListOfPlayers(ByteArrayOutputStream out, List<Player> players) throws IOException {
-        IoUtils.writeInt(out, players.size());
+    private void writeListOfPlayers(DataOutputStream out, List<Player> players) throws IOException {
+        out.writeInt(players.size());
 
         for (Player player : players) {
             IoUtils.writePlayer(out, player, true);

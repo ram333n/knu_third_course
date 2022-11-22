@@ -4,6 +4,7 @@ import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.example.Constants;
 import org.example.model.Player;
 import org.example.model.Team;
 import org.example.util.IoUtils;
@@ -45,7 +46,7 @@ public class Client implements AutoCloseable {
                 .replyTo(replyQueueName)
                 .build();
 
-        channel.basicPublish("", replyQueueName, props, params);
+        channel.basicPublish("", Constants.QUEUE, props, params);
 
         CompletableFuture<ByteArrayInputStream> response = new CompletableFuture<>();
         String ctag = channel.basicConsume(replyQueueName, true, (consumerTag, delivery) -> {
@@ -60,35 +61,39 @@ public class Client implements AutoCloseable {
     }
 
     public boolean insertTeam(Team toInsert) throws IOException, ExecutionException, InterruptedException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream outBytes = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(outBytes);
         IoUtils.writeString(out, "insertTeam");
         IoUtils.writeTeam(out, toInsert, false);
-        DataInputStream resultStream = call(out.toByteArray());
-        return resultStream.readInt() > 0;
+        DataInputStream resultStream = call(outBytes.toByteArray());
+        return resultStream.readBoolean();
     }
 
     public boolean insertPlayer(Player toInsert) throws IOException, ExecutionException, InterruptedException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream outBytes = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(outBytes);
         IoUtils.writeString(out, "insertPlayer");
         IoUtils.writePlayer(out, toInsert, false);
-        DataInputStream resultStream = call(out.toByteArray());
-        return resultStream.readInt() > 0;
+        DataInputStream resultStream = call(outBytes.toByteArray());
+        return resultStream.readBoolean();
     }
 
     public boolean deletePlayer(Long id) throws IOException, ExecutionException, InterruptedException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream outBytes = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(outBytes);
         IoUtils.writeString(out, "deletePlayer");
-        IoUtils.writeLong(out, id);
-        DataInputStream resultStream = call(out.toByteArray());
-        return resultStream.readInt() > 0;
+        out.writeLong(id);
+        DataInputStream resultStream = call(outBytes.toByteArray());
+        return resultStream.readBoolean();
     }
 
     public List<Player> findPlayersByTeamName(String teamName)
             throws IOException, ExecutionException, InterruptedException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream outBytes = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(outBytes);
         IoUtils.writeString(out, "findPlayersByTeamName");
         IoUtils.writeString(out, teamName);
-        DataInputStream resultStream = call(out.toByteArray());
+        DataInputStream resultStream = call(outBytes.toByteArray());
         return readPlayers(resultStream);
     }
 

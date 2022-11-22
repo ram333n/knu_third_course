@@ -102,7 +102,7 @@ public class TeamDao {
             statement.setString(1, toInsert.getName());
             statement.setString(2, toInsert.getCountry());
             int insertedCount = statement.executeUpdate();
-            System.out.println("Team inserted");
+
             return insertedCount > 0;
         } catch (SQLException e) {
             throw new RuntimeException(e);
