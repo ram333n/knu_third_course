@@ -1,7 +1,7 @@
 package org.example;
 
 public class CustomCyclicBarrier {
-    private int threadsCount;
+    private final int threadsCount;
     private int awaitCount;
     private final Runnable barrierAction;
 

@@ -1,8 +1,8 @@
 package org.example;
 
 public class CustomThread extends Thread {
-    private long duration;
-    private int number;
+    private final long duration;
+    private final int number;
     private final CustomCyclicBarrier barrier;
 
     public CustomThread(CustomCyclicBarrier barrier, long duration, int number) {
