@@ -27,6 +27,7 @@ public class Scheduling {
     String line;
     int cpuTime = 0;
     int ioBlocking = 0;
+    long ticketsCount = 0L;
     int pidCounter = 0;
     double X = 0.0;
 
@@ -54,6 +55,8 @@ public class Scheduling {
           StringTokenizer st = new StringTokenizer(line);
           st.nextToken();
           ioBlocking = Common.s2i(st.nextToken());
+          ticketsCount = Long.parseLong(st.nextToken());
+
           X = Common.R1();
 
           while (X == -1.0) {
@@ -62,7 +65,7 @@ public class Scheduling {
 
           X = X * standardDev;
           cpuTime = (int) X + meanDev;
-          processVector.addElement(new Process(pidCounter, cpuTime, ioBlocking, 0, 0, 0));
+          processVector.addElement(new Process(pidCounter, cpuTime, ioBlocking, 0, 0, 0, ticketsCount));
           pidCounter++;
         }
 
@@ -118,6 +121,7 @@ public class Scheduling {
     init(args[0]);
 
     if (processVector.size() < processNum) {
+      long defaultTicketsCount = 100L;
       i = 0;
 
       while (processVector.size() < processNum) {
@@ -129,10 +133,11 @@ public class Scheduling {
 
         X = X * standardDev;
         int cpuTime = (int) X + meanDev;
-        processVector.addElement(new Process(i, cpuTime,i*100,0,0,0));
+        processVector.addElement(new Process(i, cpuTime,i*100,0,0,0, defaultTicketsCount));
         i++;
       }
     }
+
     result = SchedulingAlgorithm.run(runtime, processVector, result);
     try (PrintStream out = new PrintStream(new FileOutputStream(resultsFile))) {
       out.println("Scheduling Type: " + result.schedulingType);
@@ -140,10 +145,10 @@ public class Scheduling {
       out.println("Simulation Run Time: " + result.compuTime);
       out.println("Mean: " + meanDev);
       out.println("Standard Deviation: " + standardDev);
-      out.println("Process #\tCPU Time\tIO Blocking\tCPU Completed\tCPU Blocked");
+      out.println("Process #\tCPU Time\tIO Blocking\tCPU Completed\tCPU Blocked\tTickets");
 
       for (i = 0; i < processVector.size(); i++) {
-        Process process = (Process) processVector.elementAt(i);
+        Process process = processVector.elementAt(i);
         out.print(Integer.toString(i));
         if (i < 100) { out.print("\t\t"); } else { out.print("\t"); }
         out.print(Integer.toString(process.cpuTime));
@@ -152,7 +157,9 @@ public class Scheduling {
         if (process.ioBlocking < 100) { out.print(" (ms)\t\t"); } else { out.print(" (ms)\t"); }
         out.print(Integer.toString(process.cpuDone));
         if (process.cpuDone < 100) { out.print(" (ms)\t\t"); } else { out.print(" (ms)\t"); }
-        out.println(process.numBlocked + " times");
+        out.print(process.numBlocked + " times");
+        if (process.numBlocked < 100) { out.print(" (ms)\t\t"); } else { out.print(" (ms)\t"); }
+        out.println(process.ticketsCount);
       }
 
     } catch (IOException e) {
