@@ -10,64 +10,52 @@ import java.io.*;
 public class SchedulingAlgorithm {
 
   public static Results run(int runtime, Vector<Process> processVector, Results result) {
-    int i = 0;
     int compTime = 0;
-    int currentProcessId = 0;
-    int previousProcessId = 0;
+    int currentProcessIdx = 0;
     int size = processVector.size();
     int completed = 0;
-    String resultsFile = "Summary-Processes";
 
-    result.schedulingType = "Batch (Nonpreemptive)";
-    result.schedulingName = "First-Come First-Served";
+    String resultsFile = "Summary-Processes";
+    result.schedulingType = "Interactive (Non-preemptive)";
+    result.schedulingName = "Lottery";
 
     try (PrintStream out = new PrintStream(new FileOutputStream(resultsFile))) {
-      Process process = processVector.elementAt(currentProcessId);
-      logProcess(out, process, "registered");
+      Lottery lottery = new Lottery(processVector);
+      currentProcessIdx = lottery.performLottery(processVector);
+      Process currentProcess = processVector.elementAt(currentProcessIdx);
+      logProcess(out, currentProcess, "registered");
 
       while (compTime < runtime) {
-        if (process.cpuDone == process.cpuTime) {
+        if (currentProcess.isCompleted()) {
           completed++;
-          logProcess(out, process, "completed");
+          logProcess(out, currentProcess, "completed");
 
           if (completed == size) {
             result.compuTime = compTime;
             return result;
           }
 
-          for (i = size - 1; i >= 0; i--) {
-            process = processVector.elementAt(i);
-            if (process.cpuDone < process.cpuTime) {
-              currentProcessId = i;
-            }
-          }
-
-          process = processVector.elementAt(currentProcessId);
-          logProcess(out, process, "registered");
+          currentProcessIdx = getNextProcess(lottery, processVector);
+          currentProcess = processVector.elementAt(currentProcessIdx);
+          logProcess(out, currentProcess, "registered");
         }
 
-        if (process.ioBlocking == process.ioNext) {
-          logProcess(out, process, "I/O blocked");
+        if (currentProcess.ioBlocking == currentProcess.ioNext) {
+          logProcess(out, currentProcess, "I/O blocked");
 
-          process.numBlocked++;
-          process.ioNext = 0;
-          previousProcessId = currentProcessId;
+          currentProcess.numBlocked++;
+          currentProcess.ioNext = 0;
 
-          for (i = size - 1; i >= 0; i--) {
-            process = processVector.elementAt(i);
-            if (process.cpuDone < process.cpuTime && previousProcessId != i) {
-              currentProcessId = i;
-            }
-          }
+          currentProcessIdx = getNextProcess(lottery, processVector);
 
-          process = processVector.elementAt(currentProcessId);
-          logProcess(out, process, "registered");
+          currentProcess = processVector.elementAt(currentProcessIdx);
+          logProcess(out, currentProcess, "registered");
         }
 
-        process.cpuDone++;
+        currentProcess.cpuDone++;
 
-        if (process.ioBlocking > 0) {
-          process.ioNext++;
+        if (currentProcess.ioBlocking > 0) {
+          currentProcess.ioNext++;
         }
 
         compTime++;
@@ -90,4 +78,14 @@ public class SchedulingAlgorithm {
     ));
   }
 
+  private static int getNextProcess(Lottery lottery, Vector<Process> processes) {
+    while (true) {
+      int idx = lottery.performLottery(processes);
+      Process current = processes.elementAt(idx);
+
+      if (!current.isCompleted()) {
+        return idx;
+      }
+    }
+  }
 }

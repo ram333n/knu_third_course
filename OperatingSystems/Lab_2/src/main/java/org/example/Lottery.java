@@ -17,27 +17,17 @@ public class Lottery {
     }
   }
 
-  public long getTicketsCount() {
-    return ticketsCount;
-  }
-
-  public void setTicketsCount(long ticketsCount) {
-    this.ticketsCount = ticketsCount;
-  }
-
   public int performLottery(Vector<Process> processes) {
     long luckyTicket = random.nextLong(ticketsCount) + 1;
     long checkedTickets = 0;
 
-    for (Process process : processes) {
-      if (process.isCompleted()) {
-        continue;
-      }
+    for (int i = 0; i < processes.size(); i++) {
+      Process process = processes.elementAt(i);
 
       checkedTickets += process.ticketsCount;
 
       if (luckyTicket <= checkedTickets) {
-        return process.pid;
+        return i;
       }
     }
 

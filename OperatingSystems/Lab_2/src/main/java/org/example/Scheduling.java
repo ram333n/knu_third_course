@@ -158,7 +158,7 @@ public class Scheduling {
         out.print(Integer.toString(process.cpuDone));
         if (process.cpuDone < 100) { out.print(" (ms)\t\t"); } else { out.print(" (ms)\t"); }
         out.print(process.numBlocked + " times");
-        if (process.numBlocked < 100) { out.print(" (ms)\t\t"); } else { out.print(" (ms)\t"); }
+        if (process.numBlocked < 100) { out.print(" \t\t"); } else { out.print(" \t"); }
         out.println(process.ticketsCount);
       }
 
