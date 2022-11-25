@@ -9,64 +9,85 @@ import java.io.*;
 
 public class SchedulingAlgorithm {
 
-  public static Results Run(int runtime, Vector processVector, Results result) {
+  public static Results run(int runtime, Vector<Process> processVector, Results result) {
     int i = 0;
-    int comptime = 0;
-    int currentProcess = 0;
-    int previousProcess = 0;
+    int compTime = 0;
+    int currentProcessId = 0;
+    int previousProcessId = 0;
     int size = processVector.size();
     int completed = 0;
     String resultsFile = "Summary-Processes";
 
     result.schedulingType = "Batch (Nonpreemptive)";
-    result.schedulingName = "First-Come First-Served"; 
-    try {
-      //BufferedWriter out = new BufferedWriter(new FileWriter(resultsFile));
-      //OutputStream out = new FileOutputStream(resultsFile);
-      PrintStream out = new PrintStream(new FileOutputStream(resultsFile));
-      sProcess process = (sProcess) processVector.elementAt(currentProcess);
-      out.println("Process: " + currentProcess + " registered... (" + process.cputime + " " + process.ioblocking + " " + process.cpudone + " " + process.cpudone + ")");
-      while (comptime < runtime) {
-        if (process.cpudone == process.cputime) {
+    result.schedulingName = "First-Come First-Served";
+
+    try (PrintStream out = new PrintStream(new FileOutputStream(resultsFile))) {
+      Process process = processVector.elementAt(currentProcessId);
+      logProcess(out, process, "registered");
+
+      while (compTime < runtime) {
+        if (process.cpuDone == process.cpuTime) {
           completed++;
-          out.println("Process: " + currentProcess + " completed... (" + process.cputime + " " + process.ioblocking + " " + process.cpudone + " " + process.cpudone + ")");
+          logProcess(out, process, "completed");
+
           if (completed == size) {
-            result.compuTime = comptime;
-            out.close();
+            result.compuTime = compTime;
             return result;
           }
+
           for (i = size - 1; i >= 0; i--) {
-            process = (sProcess) processVector.elementAt(i);
-            if (process.cpudone < process.cputime) { 
-              currentProcess = i;
+            process = processVector.elementAt(i);
+            if (process.cpuDone < process.cpuTime) {
+              currentProcessId = i;
             }
           }
-          process = (sProcess) processVector.elementAt(currentProcess);
-          out.println("Process: " + currentProcess + " registered... (" + process.cputime + " " + process.ioblocking + " " + process.cpudone + " " + process.cpudone + ")");
-        }      
-        if (process.ioblocking == process.ionext) {
-          out.println("Process: " + currentProcess + " I/O blocked... (" + process.cputime + " " + process.ioblocking + " " + process.cpudone + " " + process.cpudone + ")");
-          process.numblocked++;
-          process.ionext = 0; 
-          previousProcess = currentProcess;
-          for (i = size - 1; i >= 0; i--) {
-            process = (sProcess) processVector.elementAt(i);
-            if (process.cpudone < process.cputime && previousProcess != i) { 
-              currentProcess = i;
-            }
-          }
-          process = (sProcess) processVector.elementAt(currentProcess);
-          out.println("Process: " + currentProcess + " registered... (" + process.cputime + " " + process.ioblocking + " " + process.cpudone + " " + process.cpudone + ")");
-        }        
-        process.cpudone++;       
-        if (process.ioblocking > 0) {
-          process.ionext++;
+
+          process = processVector.elementAt(currentProcessId);
+          logProcess(out, process, "registered");
         }
-        comptime++;
+
+        if (process.ioBlocking == process.ioNext) {
+          logProcess(out, process, "I/O blocked");
+
+          process.numBlocked++;
+          process.ioNext = 0;
+          previousProcessId = currentProcessId;
+
+          for (i = size - 1; i >= 0; i--) {
+            process = processVector.elementAt(i);
+            if (process.cpuDone < process.cpuTime && previousProcessId != i) {
+              currentProcessId = i;
+            }
+          }
+
+          process = processVector.elementAt(currentProcessId);
+          logProcess(out, process, "registered");
+        }
+
+        process.cpuDone++;
+
+        if (process.ioBlocking > 0) {
+          process.ioNext++;
+        }
+
+        compTime++;
       }
-      out.close();
-    } catch (IOException e) { /* Handle exceptions */ }
-    result.compuTime = comptime;
+    } catch (IOException e) {
+      /* Handle exceptions */
+    }
+
+    result.compuTime = compTime;
     return result;
   }
+
+  private static void logProcess(PrintStream out, Process process, String state) {
+    out.println(String.format("Process: %d %s...(%d %d %d) ",
+        process.pid,
+        state,
+        process.cpuTime,
+        process.ioBlocking,
+        process.cpuDone
+    ));
+  }
+
 }
