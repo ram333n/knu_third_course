@@ -15,14 +15,17 @@ def log_interpolation(func, x_start, x_end, points_count, points_to_plot=1000):
     args = np.linspace(x_start, x_end, points_count)
     values = func(args)
     points = np.array([args, values]).T
+
     lagrange = lagrange_interpolation(points)
+    newton = newton_interpolation(points)
 
     print(f"Lagrange: {lagrange}")
+    print(f"Newton: {newton}")
 
     plt.plot(args, values, 'ko')
-
     plt.plot(args_to_plot, func(args_to_plot), 'b', label='Function')
     plt.plot(args_to_plot, lagrange(args_to_plot), 'r', label='Lagrange')
+    plt.plot(args_to_plot, newton(args_to_plot), 'g', label='Newton')
     plt.title("Interpolation")
     plt.xlabel('x')
     plt.ylabel('y')
@@ -52,7 +55,44 @@ def lagrange_interpolation(points):
     return result
 
 
-log_interpolation(func, -4, 4, 5)
+def get_divided_diff_table(points):
+    points_count = points.shape[0]
+    result = np.zeros([points_count, points_count])
+    result[:, 0] = np.copy(points[:, 1])
+
+    for column in range(1, points_count):
+        for row in range(points_count - column):
+            x_left = points[row][0]
+            x_right = points[row + column][0]
+            dx = x_right - x_left
+            df = result[row + 1][column - 1] - result[row][column - 1]
+            result[row][column] = df / dx
+
+    return result
+
+
+def newton_interpolation(points):
+    result = poly.Polynomial([points[0][1]])
+    points_count = points.shape[0]
+    diff_table = get_divided_diff_table(points)
+    current_pol = poly.Polynomial([1])
+
+    for i in range(1, points_count):
+        current_pol *= poly.Polynomial([-points[i - 1][0], 1])
+        result += diff_table[0][i] * current_pol
+
+    return result
+
+
+points = np.array([
+    [-1, 1/3],
+    [0, 1],
+    [1, 3]
+])
+
+print(newton_interpolation(points))
+
+log_interpolation(func, -10, 10, 10)
 
 
 
