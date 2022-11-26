@@ -10,30 +10,6 @@ def func(x):
     return np.cos(x)
 
 
-def log_interpolation(func, x_start, x_end, points_count, points_to_plot=1000):
-    args_to_plot = np.linspace(x_start, x_end, points_to_plot)
-    args = np.linspace(x_start, x_end, points_count)
-    values = func(args)
-    points = np.array([args, values]).T
-
-    lagrange = lagrange_interpolation(points)
-    newton = newton_interpolation(points)
-
-    print(f"Lagrange: {lagrange}")
-    print(f"Newton: {newton}")
-
-    plt.plot(args, values, 'ko')
-    plt.plot(args_to_plot, func(args_to_plot), 'b', label='Function')
-    plt.plot(args_to_plot, lagrange(args_to_plot), 'r', label='Lagrange')
-    plt.plot(args_to_plot, newton(args_to_plot), 'g', label='Newton')
-    plt.title("Interpolation")
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.grid()
-    plt.legend()
-    plt.show()
-
-
 def lagrange_interpolation(points):
     points_count = points.shape[0]
     result = poly.Polynomial([0])
@@ -84,14 +60,114 @@ def newton_interpolation(points):
     return result
 
 
+def find_steps(points):
+    intervals_count = points.shape[0] - 1
+    result = np.zeros(intervals_count)
+
+    for i in range(intervals_count):
+        result[i] = points[i + 1][0] - points[i][0]
+
+    return result
+
+
+def spline_interpolation(points):
+    points_count = points.shape[0]
+    intervals_count = points_count - 1
+    result_pols = np.empty([intervals_count], poly.Polynomial)
+    steps = find_steps(points)
+    matrix_for_c = np.zeros([intervals_count - 1, intervals_count - 1])
+    rhs_vector = np.zeros(intervals_count - 1)
+    c = np.zeros(points_count)
+
+    for i in range(intervals_count - 1):
+        if i != 0:
+            matrix_for_c[i][i - 1] = steps[i]
+
+        matrix_for_c[i][i] = 2 * (steps[i] + steps[i + 1])
+
+        if i != intervals_count - 2:
+            matrix_for_c[i][i + 1] = steps[i + 1]
+
+        rhs_vector[i] = 6 * ((points[i + 2][1] - points[i + 1][1]) / steps[i + 1] -
+                             (points[i + 1][1] - points[i][1]) / steps[i])
+
+    c[1:points_count - 1] = np.linalg.solve(matrix_for_c, rhs_vector)
+
+    for i in range(1, intervals_count + 1):
+        d_i = (c[i] - c[i - 1]) / steps[i - 1]
+        c_i = c[i]
+        b_i = steps[i - 1] * c[i] / 2 - steps[i - 1] ** 2 * d_i / 6 + (points[i][1] - points[i - 1][1]) / steps[i - 1]
+        a_i = points[i][1]
+
+        current_pol = poly.Polynomial([a_i])
+        current_pol += b_i * poly.Polynomial([-points[i][0], 1])
+        current_pol += (c_i / 2) * poly.Polynomial([-points[i][0], 1]) ** 2
+        current_pol += (d_i / 6) * poly.Polynomial([-points[i][0], 1]) ** 3
+
+        result_pols[i - 1] = current_pol
+    print(points[:, 0])
+
+    return np.array([result_pols, points[:, 0]]).T
+
+
+def get_points_for_spline_plot(spline, args):
+    points_count = args.shape[0]
+    result = np.empty(points_count)
+    current_spline = 0
+
+    for i in range(points_count):
+        arg = args[i]
+
+        if arg > spline[current_spline + 1][1]:
+            current_spline += 1
+
+        # print(spline[current_spline][0])
+        print(poly.polyval(arg, spline[current_spline][0].coef))
+        result[i] = poly.polyval(arg, spline[current_spline][0].coef)
+
+    return result
+
+
+def log_interpolation(func, x_start, x_end, points_count, points_to_plot=1000):
+    args_to_plot = np.linspace(x_start, x_end, points_to_plot)
+    args = np.linspace(x_start, x_end, points_count)
+    values = func(args)
+    points = np.array([args, values]).T
+
+    lagrange = lagrange_interpolation(points)
+    newton = newton_interpolation(points)
+    spline = spline_interpolation(points)
+
+    print(f"Lagrange: {lagrange}")
+    print(f"Newton: {newton}")
+
+    plt.plot(args, values, 'ko')
+    plt.plot(args_to_plot, func(args_to_plot), 'b', label='Function')
+    plt.plot(args_to_plot, lagrange(args_to_plot), 'r', label='Lagrange')
+    plt.plot(args_to_plot, newton(args_to_plot), 'g', label='Newton')
+    plt.plot(args_to_plot, get_points_for_spline_plot(spline, args_to_plot), 'y', label='Spline')
+    plt.title("Interpolation")
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+
 points = np.array([
-    [-1, 1/3],
-    [0, 1],
-    [1, 3]
+    [0, 0],
+    [1, 0.5],
+    [2, 2],
+    [3, 1.5],
 ])
 
-print(newton_interpolation(points))
 
+# print(find_steps(points))
+#
+# print(newton_interpolation(points))
+#
+
+# print(poly.polyval(1, poly.Polynomial([1,2,3]).coef))
 log_interpolation(func, -10, 10, 10)
 
 
