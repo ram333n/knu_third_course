@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 def func(x):
-    return np.cos(x)
+    return x ** 2 * np.sin(x)
 
 
 def lagrange_interpolation(points):
@@ -105,25 +105,22 @@ def spline_interpolation(points):
         current_pol += (d_i / 6) * poly.Polynomial([-points[i][0], 1]) ** 3
 
         result_pols[i - 1] = current_pol
-    print(points[:, 0])
 
-    return np.array([result_pols, points[:, 0]]).T
+    return [result_pols, points[:, 0]]
 
 
 def get_points_for_spline_plot(spline, args):
     points_count = args.shape[0]
-    result = np.empty(points_count)
+    result = np.zeros(points_count)
     current_spline = 0
 
     for i in range(points_count):
         arg = args[i]
 
-        if arg > spline[current_spline + 1][1]:
+        if arg > spline[1][current_spline + 1]:
             current_spline += 1
 
-        # print(spline[current_spline][0])
-        print(poly.polyval(arg, spline[current_spline][0].coef))
-        result[i] = poly.polyval(arg, spline[current_spline][0].coef)
+        result[i] = poly.polyval(arg, spline[0][current_spline].coef)
 
     return result
 
@@ -138,9 +135,6 @@ def log_interpolation(func, x_start, x_end, points_count, points_to_plot=1000):
     newton = newton_interpolation(points)
     spline = spline_interpolation(points)
 
-    print(f"Lagrange: {lagrange}")
-    print(f"Newton: {newton}")
-
     plt.plot(args, values, 'ko')
     plt.plot(args_to_plot, func(args_to_plot), 'b', label='Function')
     plt.plot(args_to_plot, lagrange(args_to_plot), 'r', label='Lagrange')
@@ -153,22 +147,12 @@ def log_interpolation(func, x_start, x_end, points_count, points_to_plot=1000):
     plt.legend()
     plt.show()
 
+# points = np.array([
+#     [0, 0],
+#     [1, 0.5],
+#     [2, 2],
+#     [3, 1.5],
+# ])
 
-points = np.array([
-    [0, 0],
-    [1, 0.5],
-    [2, 2],
-    [3, 1.5],
-])
 
-
-# print(find_steps(points))
-#
-# print(newton_interpolation(points))
-#
-
-# print(poly.polyval(1, poly.Polynomial([1,2,3]).coef))
 log_interpolation(func, -10, 10, 10)
-
-
-
