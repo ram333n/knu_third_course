@@ -3,8 +3,8 @@ package org.example;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class NonBlockingQueue<T> {
-    private AtomicReference<Node<T>> head;
-    private AtomicReference<Node<T>> tail;
+    private final AtomicReference<Node<T>> head;
+    private final AtomicReference<Node<T>> tail;
 
     public NonBlockingQueue() {
         Node<T> dummy = new Node<>();
