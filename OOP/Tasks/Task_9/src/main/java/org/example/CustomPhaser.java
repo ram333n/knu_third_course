@@ -21,18 +21,6 @@ public class CustomPhaser {
         return phase;
     }
 
-    public synchronized int arrive() {
-        partiesAwait--;
-
-        if (partiesAwait == 0) {
-            notifyAll();
-            partiesAwait = parties;
-            phase++;
-        }
-
-        return phase;
-    }
-
     public synchronized int arriveAndAwaitAdvance() throws InterruptedException {
         partiesAwait--;
 
@@ -57,10 +45,6 @@ public class CustomPhaser {
             partiesAwait = parties;
         }
 
-        return phase;
-    }
-
-    public int getPhase() {
         return phase;
     }
 }

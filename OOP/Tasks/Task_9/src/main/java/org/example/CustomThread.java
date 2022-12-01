@@ -17,11 +17,11 @@ public class CustomThread implements Runnable {
             System.out.println("Task "+Thread.currentThread().getId()+" arrived");
             phaser.arriveAndAwaitAdvance();
 
-            Thread.sleep(duration * 2);
             System.out.println("Task "+Thread.currentThread().getId()+" arrived");
             phaser.arriveAndAwaitAdvance();
             Thread.sleep(duration);
             phaser.arriveAndDeregister();
+            System.out.println("Task "+Thread.currentThread().getId()+" finished");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
