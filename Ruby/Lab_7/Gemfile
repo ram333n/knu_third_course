@@ -45,6 +45,10 @@ gem "bootsnap", require: false
 #Twitter Bootstrap
 gem "twitter-bootstrap-rails"
 
+# JQuery
+gem 'jquery-rails'
+gem 'turbolinks'
+
 # Use Sass to process CSS
 # gem "sassc-rails"
 
