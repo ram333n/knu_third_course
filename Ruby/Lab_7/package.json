@@ -1,0 +1,7 @@
+{
+  "name": "Lab_7",
+  "version": "1.0.0",
+  "dependencies": {
+    "@rails/ujs": "^7.0.4"
+  }
+}

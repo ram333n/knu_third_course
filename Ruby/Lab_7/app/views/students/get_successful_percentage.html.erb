@@ -1,4 +1,7 @@
 <h1>Successful percentage</h1>
 
-<h4>Result: <%= @successful_percentage%></h4>
-<%= link_to "Back to list", students_path %>
+<h4>Result: <%= @successful_percentage.to_s + '%'%></h4>
+
+<%= link_to t('Back to list'),
+            students_path,
+            :class => 'btn btn-primary' %>
