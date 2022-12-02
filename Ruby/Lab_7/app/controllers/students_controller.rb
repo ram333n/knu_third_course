@@ -81,9 +81,9 @@ class StudentsController < ApplicationController
 
   def get_successful_subjects
     @scores_sum = Hash.new
-    @scores_sum["Geometry"] = Student.sum(:geometry_score)
-    @scores_sum["Algebra"] = Student.sum(:algebra_score)
-    @scores_sum["Informatics"] = Student.sum(:informatics_score)
+    @scores_sum[t("model.subjects.geometry")] = Student.sum(:geometry_score)
+    @scores_sum[t("model.subjects.algebra")] = Student.sum(:algebra_score)
+    @scores_sum[t("model.subjects.informatics")] = Student.sum(:informatics_score)
     @scores_sum = @scores_sum.sort_by { |k, v| v}.reverse
 
     max_score_sum = @scores_sum[0][1]
@@ -97,7 +97,7 @@ class StudentsController < ApplicationController
       subj_array.push(k)
     end
 
-    @successful_subjects = !subj_array.empty? ? subj_array.join(", ") : "There isn't any student in db"
+    @successful_subjects = !subj_array.empty? ? subj_array.join(", ") : t("message.empty_students")
   end
 
 private

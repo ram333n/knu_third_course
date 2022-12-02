@@ -1,16 +1,16 @@
 <%- model_class = Student -%>
 <div class="page-header" style="margin-left: 50px">
-  <h1><%=t '.title', :default => model_class.model_name.human.pluralize.titleize %></h1>
+  <h1><%=t 'title', :default => model_class.model_name.human.pluralize.titleize %></h1>
 </div>
 <table class="table table-striped">
   <thead>
     <tr>
-      <th><%= model_class.human_attribute_name(:id) %></th>
-      <th><%= model_class.human_attribute_name(:surname) %></th>
-      <th><%= model_class.human_attribute_name(:group) %></th>
-      <th><%= model_class.human_attribute_name(:geometry_score) %></th>
-      <th><%= model_class.human_attribute_name(:algebra_score) %></th>
-      <th><%= model_class.human_attribute_name(:informatics_score) %></th>
+      <th><%= t("model.id")%></th>
+      <th><%= t("model.surname") %></th>
+      <th><%= t("model.group") %></th>
+      <th><%= t("model.geometry_score") %></th>
+      <th><%= t("model.algebra_score") %></th>
+      <th><%= t("model.informatics_score") %></th>
       <th><%=t '.actions', :default => t("helpers.actions") %></th>
     </tr>
   </thead>
@@ -43,19 +43,19 @@
             new_student_path,
             :class => 'btn btn-primary' %>
 
-<%= link_to t('Student with academic debt'),
+<%= link_to t('queries.students_with_academic_debt'),
             "/students/academic-debt",
             :class => 'btn btn-primary' %>
 
-<%= link_to t('Groups by success'),
+<%= link_to t('queries.groups_by_success'),
             "/students/groups-by-success",
             :class => 'btn btn-primary' %>
 
-<%= link_to t('Successful percentage'),
+<%= link_to t('queries.successful_percentage'),
             "/students/successful-percentage",
             :class => 'btn btn-primary' %>
 
-<%= link_to t('Successful subjects'),
+<%= link_to t('queries.successful_subjects'),
             "/students/successful-subjects",
             :class => 'btn btn-primary' %>
 

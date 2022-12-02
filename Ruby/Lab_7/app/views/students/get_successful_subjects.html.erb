@@ -1,7 +1,7 @@
-<h1>Successful subjects</h1>
+<h1><%=t("queries.successful_subjects") %></h1>
 
-<h4>Result: <%= @successful_subjects%></h4>
+<h4><%= @successful_subjects%></h4>
 
-<%= link_to t('Back to list'),
+<%= link_to t("helpers.links.back"),
             students_path,
             :class => 'btn btn-primary' %>

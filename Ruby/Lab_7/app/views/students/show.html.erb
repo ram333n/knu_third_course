@@ -1,18 +1,18 @@
 <%- model_class = Student -%>
 <div class="page-header">
-  <h1><%=t '.title', :default => model_class.model_name.human.titleize %></h1>
+  <h1><%=t 'model.student', :default => model_class.model_name.human.titleize %></h1>
 </div>
 
 <dl class="dl-horizontal">
-  <dt><strong><%= model_class.human_attribute_name(:surname) %>:</strong></dt>
+  <dt><strong><%= t("model.surname") %>:</strong></dt>
   <dd><%= @student.surname %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:group) %>:</strong></dt>
+  <dt><strong><%= t("model.group") %>:</strong></dt>
   <dd><%= @student.group %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:geometry_score) %>:</strong></dt>
+  <dt><strong><%= t("model.geometry_score") %>:</strong></dt>
   <dd><%= @student.geometry_score %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:algebra_score) %>:</strong></dt>
+  <dt><strong><%= t("model.algebra_score") %>:</strong></dt>
   <dd><%= @student.algebra_score %></dd>
-  <dt><strong><%= model_class.human_attribute_name(:informatics_score) %>:</strong></dt>
+  <dt><strong><%= t("model.informatics_score") %>:</strong></dt>
   <dd><%= @student.informatics_score %></dd>
 </dl>
 

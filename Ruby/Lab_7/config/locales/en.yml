@@ -30,4 +30,26 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 en:
-  hello: "Hello world"
+  title: "Students"
+  model:
+    student: "Student"
+    students: "Students"
+    id : "id"
+    surname: "Surname"
+    group: "Group"
+    geometry_score: "Geometry score"
+    algebra_score: "Algebra score"
+    informatics_score: "Informatics score"
+    subjects:
+      algebra: "Algebra"
+      geometry: "Geometry"
+      informatics: "Informatics"
+  queries:
+    students_with_academic_debt: "Students with academic debt"
+    groups_by_success: "Groups by success"
+    successful_percentage: "Successful percentage"
+    successful_subjects: "Successful subjects"
+  message:
+    empty_groups: "There isn't any group in db"
+    empty_students: "There isn't any student in db"
+

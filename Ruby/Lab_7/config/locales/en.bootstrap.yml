@@ -8,6 +8,9 @@ en:
     pages:
       pages: "Pages"
   helpers:
+    submit:
+      "create": "Create"
+      "update": "Update"
     actions: "Actions"
     links:
       back: "Back"
