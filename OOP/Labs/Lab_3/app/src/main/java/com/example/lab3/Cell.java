@@ -7,6 +7,7 @@ public class Cell {
     public boolean leftWall = true;
     public boolean bottomWall = true;
     public boolean rightWall = true;
+    public boolean visited = false;
 
     public Cell(int column, int row) {
         this.column = column;
