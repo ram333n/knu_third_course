@@ -25,10 +25,12 @@ public class GameView extends View {
     private Cell[][] cells;
     private Cell player;
     private Cell exit;
+    private List<Cell> path;
 
     private final Paint wallPaint;
     private final Paint playerPaint;
     private final Paint exitPaint;
+    private final Paint pathPaint;
 
     private float cellSize;
     private float hMargin;
@@ -40,12 +42,14 @@ public class GameView extends View {
         this.wallPaint = new Paint();
         this.playerPaint = new Paint();
         this.exitPaint = new Paint();
+        this.pathPaint = new Paint();
 
         wallPaint.setColor(Color.BLACK);
         wallPaint.setStrokeWidth(WALL_THICKNESS);
 
         playerPaint.setColor(Color.RED);
         exitPaint.setColor(Color.BLUE);
+        pathPaint.setColor(Color.WHITE);
 
         createMaze();
         spawn();
@@ -60,6 +64,8 @@ public class GameView extends View {
                 cells[i][j] = new Cell(i, j);
             }
         }
+
+        path = new ArrayList<>();
     }
 
     private void spawn() {
@@ -75,7 +81,7 @@ public class GameView extends View {
         current.visited = true;
 
         do {
-            next = getNeighbour(current);
+            next = getRandomNeighbour(current);
 
             if (next != null) {
                 removeWall(current, next);
@@ -88,7 +94,20 @@ public class GameView extends View {
         } while (!stack.empty());
     }
 
-    private Cell getNeighbour(Cell cell) {
+    private Cell getRandomNeighbour(Cell cell) {
+        List<Cell> neighbours = getNeighboursForGeneration(cell);
+
+        Cell result = null;
+
+        if (neighbours.size() > 0) {
+            int index = random.nextInt(neighbours.size());
+            result = neighbours.get(index);
+        }
+
+        return result;
+    }
+
+    private List<Cell> getNeighboursForGeneration(Cell cell) {
         List<Cell> neighbours = new ArrayList<>();
 
         //left
@@ -119,14 +138,7 @@ public class GameView extends View {
             }
         }
 
-        Cell result = null;
-
-        if (neighbours.size() > 0) {
-            int index = random.nextInt(neighbours.size());
-            result = neighbours.get(index);
-        }
-
-        return result;
+        return neighbours;
     }
 
     private void removeWall(Cell current, Cell next) {
@@ -157,7 +169,7 @@ public class GameView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawColor(Color.GREEN);
+        canvas.drawColor(Color.YELLOW);
 
         int width = getWidth();
         int height = getHeight() - BUTTON_HEIGHT;
@@ -173,6 +185,9 @@ public class GameView extends View {
 
         canvas.translate(hMargin, wMargin);
         drawMaze(canvas);
+        drawPath(canvas);
+        drawCell(player, canvas, playerPaint);
+        drawCell(exit, canvas, exitPaint);
     }
 
     private void drawMaze(Canvas canvas) {
@@ -219,9 +234,12 @@ public class GameView extends View {
                 }
             }
         }
+    }
 
-        drawCell(player, canvas, playerPaint);
-        drawCell(exit, canvas, exitPaint);
+    private void drawPath(Canvas canvas) {
+        for (Cell cell : path) {
+            drawCell(cell, canvas, pathPaint);
+        }
     }
 
     private void drawCell(Cell cell, Canvas canvas, Paint paint) {
@@ -316,11 +334,81 @@ public class GameView extends View {
         createMaze();
         spawn();
         generateMaze();
+        invalidate();
+    }
+
+    public void findPath() {
+        for (int i = 0; i < COLUMNS; i++) {
+            for (int j = 0; j < ROWS; j++) {
+                cells[i][j].visited = false;
+            }
+        }
+
+        path.clear();
+        explore(player, path);
+
+        invalidate();
+    }
+
+    private boolean explore(Cell current, List<Cell> path) {
+        if (current.visited) {
+            return false;
+        }
+
+        if (current == exit) {
+            return true;
+        }
+
+        path.add(current);
+        current.visited = true;
+
+        for (Cell neighbour : getNeighbours(current)) {
+            if (explore(neighbour, path)) {
+                return true;
+            }
+        }
+
+        path.remove(path.size() - 1);
+        return false;
     }
 
     private void checkExit() {
         if (player == exit) {
             restart();
         }
+    }
+
+    private List<Cell> getNeighbours(Cell cell) {
+        List<Cell> neighbours = new ArrayList<>();
+
+        //left
+        if (cell.column > 0) {
+            if (!cell.leftWall) {
+                neighbours.add(cells[cell.column - 1][cell.row]);
+            }
+        }
+
+        //right
+        if (cell.column < COLUMNS - 1) {
+            if (!cell.rightWall) {
+                neighbours.add(cells[cell.column + 1][cell.row]);
+            }
+        }
+
+        //top
+        if (cell.row > 0) {
+            if (!cell.topWall) {
+                neighbours.add(cells[cell.column][cell.row - 1]);
+            }
+        }
+
+        //bottom
+        if (cell.row < ROWS - 1) {
+            if (!cell.bottomWall) {
+                neighbours.add(cells[cell.column][cell.row + 1]);
+            }
+        }
+
+        return neighbours;
     }
 }
