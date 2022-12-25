@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Manager>
+    <Team country="Ukraine" id="b720affc-3030-4974-a13c-11887683aca8" name="Dynamo">
+        <Player id="6779598e-a429-494d-9518-457fb8194009" name="Bushan" price="500000" teamId="b720affc-3030-4974-a13c-11887683aca8"/>
+        <Player id="f0984cb1-9631-4a67-8475-de7777d88aba" name="Shaparenko" price="1000000" teamId="b720affc-3030-4974-a13c-11887683aca8"/>
+        <Player id="41ac24c0-e33f-4be5-a69d-763ee7978943" name="Besedin" price="300" teamId="b720affc-3030-4974-a13c-11887683aca8"/>
+    </Team>
+    <Team country="Ukraine" id="98abbc6a-3a6c-49b5-b65d-703e4ae212be" name="Shakhtar">
+        <Player id="16c5eb63-3b4c-43af-801b-787e7586cda0" name="Mudryk" price="3000000" teamId="98abbc6a-3a6c-49b5-b65d-703e4ae212be"/>
+        <Player id="1cb0926d-2ac3-4105-80bc-1ff8d21c9df7" name="Trubin" price="2000000" teamId="98abbc6a-3a6c-49b5-b65d-703e4ae212be"/>
+    </Team>
+    <Team country="Spain" id="93704eec-53ab-4f50-88ae-03466104ce57" name="Real Madrid">
+        <Player id="680344f8-f152-40a8-bd28-00442251b8d3" name="Lunin" price="9000000" teamId="93704eec-53ab-4f50-88ae-03466104ce57"/>
+        <Player id="81dbd732-372d-437d-b87e-4f821d5257a1" name="Benzema" price="4000000" teamId="93704eec-53ab-4f50-88ae-03466104ce57"/>
+        <Player id="806f7acb-cc33-42ae-8d35-44c6a05ece21" name="Cortois" price="5000000" teamId="93704eec-53ab-4f50-88ae-03466104ce57"/>
+    </Team>
+    <Team country="France" id="8cae924b-e7c4-4c0a-9772-f506ae999bb8" name="PSG">
+        <Player id="fb9fbe92-32d0-47cb-8a0f-35d28ab1f247" name="Messi" price="1000000" teamId="8cae924b-e7c4-4c0a-9772-f506ae999bb8"/>
+        <Player id="d2264520-8f70-4527-9c3e-6db4b382287b" name="Mbappe" price="2000000" teamId="8cae924b-e7c4-4c0a-9772-f506ae999bb8"/>
+    </Team>
+</Manager>
