@@ -1,0 +1,17 @@
+<h1><%=t("queries.groups_by_success") %></h1>
+
+<%if @groups_by_success.empty? %>
+  <h4><%=t("message.empty_groups") %></h4>
+<% else %>
+  <ul>
+    <%@groups_by_success.each do |k, v| %>
+      <li>
+        <%= "#{k}: #{v}%" %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
+
+<%= link_to t('helpers.links.back'),
+            students_path,
+            :class => 'btn btn-primary' %>

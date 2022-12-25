@@ -1,0 +1,61 @@
+<%- model_class = Student -%>
+<div class="page-header" style="margin-left: 50px">
+  <h1><%=t 'title', :default => model_class.model_name.human.pluralize.titleize %></h1>
+</div>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th><%= t("model.id")%></th>
+      <th><%= t("model.surname") %></th>
+      <th><%= t("model.group") %></th>
+      <th><%= t("model.geometry_score") %></th>
+      <th><%= t("model.algebra_score") %></th>
+      <th><%= t("model.informatics_score") %></th>
+      <th><%=t '.actions', :default => t("helpers.actions") %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @students.each do |student| %>
+      <tr>
+        <td><%= link_to student.id, student_path(student) %></td>
+        <td><%= student.surname %></td>
+        <td><%= student.group %></td>
+        <td><%= student.geometry_score %></td>
+        <td><%= student.algebra_score %></td>
+        <td><%= student.informatics_score %></td>
+        <td>
+          <%= link_to t('.show', :default => t("helpers.links.show")),
+                      student_path(student), :class => 'btn btn-default btn-xs' %>
+          <%= link_to t('.edit', :default => t("helpers.links.edit")),
+                      edit_student_path(student), :class => 'btn btn-default btn-xs' %>
+          <%= link_to t('.destroy', :default => t("helpers.links.destroy")),
+                      student_path(student),
+                      :method => 'delete',
+                      :data => { :confirm => t('.confirm', :default => t("helpers.links.confirm", :default => 'Are you sure?')) },
+                      :class => 'btn btn-xs btn-danger' %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to t('.new', :default => t("helpers.links.new")),
+            new_student_path,
+            :class => 'btn btn-primary' %>
+
+<%= link_to t('queries.students_with_academic_debt'),
+            "/students/academic-debt",
+            :class => 'btn btn-primary' %>
+
+<%= link_to t('queries.groups_by_success'),
+            "/students/groups-by-success",
+            :class => 'btn btn-primary' %>
+
+<%= link_to t('queries.successful_percentage'),
+            "/students/successful-percentage",
+            :class => 'btn btn-primary' %>
+
+<%= link_to t('queries.successful_subjects'),
+            "/students/successful-subjects",
+            :class => 'btn btn-primary' %>
+

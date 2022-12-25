@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  surname: MyString
+  group: MyString
+  geometry_score: 1
+  algebra_score: 1
+  informatics_score: 1
+
+two:
+  surname: MyString
+  group: MyString
+  geometry_score: 1
+  algebra_score: 1
+  informatics_score: 1
